@@ -1,3 +1,44 @@
+# NuvioDV
+
+> [!IMPORTANT]
+> This is a personal Android fork of
+> [NuvioMobile](https://github.com/NuvioMedia/NuvioMobile), maintained only to
+> cover player gaps that are not yet addressed upstream. It is not an official
+> Nuvio build.
+
+NuvioDV currently covers two independent libmpv concerns:
+
+- improved Dolby Vision handling through a libdovi-enabled libmpv build; and
+- an included libplacebo correction relevant to the late-playback pink-screen
+  failure. The pink-screen issue is not being treated as a Dolby Vision issue.
+
+The Android app uses the package ID `com.darkaxt.nuviodv`, the visible name
+`NuvioDV`, and `NuvioDV-*.apk` output names, so it can be installed alongside
+the standard Nuvio app. The Kotlin namespace remains unchanged intentionally.
+
+This fork should be deprecated as soon as upstream Nuvio and its player stack
+cover these gaps. A possible later expansion with mpvEx features is explicitly
+outside the current scope.
+
+## Patched player provenance
+
+The Android build vendors `composeApp/libs/lib-mpv-android-libdovi-arm64.aar`
+from [Darkaxt/mpv-android-libdovi](https://github.com/Darkaxt/mpv-android-libdovi):
+
+- source commit: `a6d4de8b2109347e07dcd2daef258deee9a97e29`
+- successful build: [GitHub Actions run 34656988140](https://github.com/Darkaxt/mpv-android-libdovi/actions/runs/34656988140)
+- artifact: `mpv-android-libdovi-arm64`
+- AAR SHA-256: `B266C9F5ED940B761DA572F1496FCF2152FE624CDFD42354B33BA5C9E3FC8721`
+
+The native libmpv payload is ARM64-only. This integration does not claim full
+Dolby Vision Profile 7 FEL decoding. Device playback validation is intentionally
+performed by the fork owner as real-world samples become available.
+
+No NuvioDV release is currently published; build it locally using the Android
+instructions below.
+
+## Upstream project
+
 <div align="center">
 
   <img src="https://nuvio.tv/assets/nuvio-app-logo-wordmark.webp" alt="Nuvio" width="320" />
@@ -12,7 +53,7 @@
 
 </div>
 
-## Get Nuvio Mobile
+### Get official Nuvio Mobile
 
 - [Android on Google Play](https://play.google.com/store/apps/details?id=com.nuvio.app)
 - [Android APK](https://github.com/NuvioMedia/NuvioMobile/releases/latest)
@@ -21,7 +62,7 @@
 ## Build from source
 
 ```bash
-git clone https://github.com/NuvioMedia/NuvioMobile.git
+git clone https://github.com/Darkaxt/NuvioMobile.git
 cd NuvioMobile
 ```
 
