@@ -32,12 +32,20 @@ def compute_next_version(
 
     current_core = parse_core(current_match)
     upstream_core = parse_core(upstream_match)
+    current_fork = int(current_match.group("fork"))
     if upstream_core > current_core:
         next_core = upstream_core
+        next_fork = 1
+    elif upstream_core == current_core:
+        next_core = upstream_core
+        next_fork = current_fork + 1
     else:
-        next_core = (current_core[0], current_core[1], current_core[2] + 1)
+        raise ValueError(
+            f"Upstream version {upstream_name} is older than the fork base "
+            f"{'.'.join(str(component) for component in current_core)}"
+        )
 
-    next_name = ".".join(str(component) for component in next_core) + "-nuviodv.1"
+    next_name = ".".join(str(component) for component in next_core) + f"-nuviodv.{next_fork}"
     next_code = max(current_code, upstream_code) + 1
     return next_name, next_code
 

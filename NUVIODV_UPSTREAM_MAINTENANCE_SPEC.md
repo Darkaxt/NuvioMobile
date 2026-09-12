@@ -7,7 +7,7 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - M1: A GitHub Actions workflow must check `NuvioMedia/NuvioMobile` branch `cmp-rewrite` daily.
 - M2: When no upstream commit is missing from `Darkaxt/NuvioMobile:cmp-rewrite`, the workflow must not create a commit, push, or release.
 - M3: When upstream commits are missing, merge their history into the fork without discarding NuvioDV changes. The workflow may automatically preserve the fork's `iosApp/Configuration/Version.xcconfig` during a conflict limited to that file; any other merge conflict must fail closed for manual repair.
-- M4: Each synchronized release must advance both the NuvioDV base semantic version and Android version code. Choose a base version newer than the current NuvioDV base and at least as new as upstream, then use suffix `-nuviodv.1`.
+- M4: Each synchronized release must retain the exact current upstream semantic version as its base and advance the Android version code. If upstream remains on the same version, increment only the `-nuviodv.#` fork counter; if upstream advances its version, adopt it and reset the fork counter to `1`; fail closed if upstream appears older than the fork base.
 - M5: Before pushing, verify the NuvioDV package identity, app label, local patched libmpv dependency, authenticated-release test, and a full Android debug APK build. A failed invariant or build must prevent the push and release.
 - M6: After pushing the verified sync commit, dispatch the authenticated NuvioDV prerelease workflow with that exact commit as an explicit checkout input. Branch-ref propagation must not be allowed to publish an older commit.
 - M7: A recurring Codex check must run every three days. It must inspect upstream divergence and daily-workflow/release results; if GitHub automation failed or left commits unsynchronized, it is authorized to diagnose, make the minimal fork-preserving repair, verify, commit, push, and trigger the release itself.
@@ -16,7 +16,7 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 
 ## Acceptance criteria
 
-- MC1: Version-advance tests fail for same-base pseudo-versions and pass for a higher semantic core plus higher Android version code.
+- MC1: Version-advance tests prove same-base fork-counter increments, newer-upstream resets, older-upstream rejection, and a higher Android version code.
 - MC2: The daily workflow parses, has write permissions needed for source sync and release dispatch, and contains fail-closed merge/build behavior.
 - MC3: A manual workflow dispatch consumes the currently pending upstream commits, preserves fork invariants, pushes the verified merge, and dispatches a successful authenticated prerelease.
 - MC4: A three-day Codex heartbeat is active with the authorized remediation and playback-issue scope.
