@@ -1418,6 +1418,11 @@ private class NuvioLibmpvView(
         val videoHeight = mpv.getPropertyInt("video-out-params/dh")
             ?: mpv.getPropertyInt("video-params/dh")
             ?: 0
+        val videoCodec = mpv.getPropertyString("current-tracks/video/codec")
+        val videoFrameRate = mpv.getPropertyDouble("current-tracks/video/demux-fps")
+            ?.takeIf { it.isFinite() && it > 0.0 }
+            ?.toFloat()
+        val videoDynamicRange = mpv.videoDynamicRange()
         return PlayerPlaybackSnapshot(
             isLoading = isLoading,
             isPlaying = !paused && !isLoading && !idle && !ended,
@@ -1428,7 +1433,23 @@ private class NuvioLibmpvView(
             playbackSpeed = (mpv.getPropertyDouble("speed") ?: 1.0).toFloat(),
             videoWidth = videoWidth,
             videoHeight = videoHeight,
+            videoCodec = videoCodec,
+            videoDynamicRange = videoDynamicRange,
+            videoFrameRate = videoFrameRate,
         )
+    }
+
+    private fun MPV.videoDynamicRange(): VideoDynamicRange? {
+        val dolbyVisionProfile = getPropertyInt("current-tracks/video/dolby-vision-profile")
+        val colorMatrix = getPropertyString("video-params/colormatrix")?.lowercase()
+        val gamma = getPropertyString("video-params/gamma")?.lowercase()
+        return when {
+            dolbyVisionProfile != null || colorMatrix == "dolbyvision" -> VideoDynamicRange.DolbyVision
+            gamma == "hlg" -> VideoDynamicRange.Hlg
+            gamma == "pq" -> VideoDynamicRange.Hdr
+            !gamma.isNullOrBlank() && gamma != "auto" -> VideoDynamicRange.Sdr
+            else -> null
+        }
     }
 
     fun applyResizeMode(resizeMode: PlayerResizeMode) {
@@ -1750,6 +1771,7 @@ private const val MPV_SUBTITLE_OUTLINE_SIZE_SCALE = 1.5
 
 private fun ExoPlayer.snapshot(): PlayerPlaybackSnapshot {
     val (videoWidth, videoHeight) = videoDimensions()
+    val format = videoFormat
     return PlayerPlaybackSnapshot(
         isLoading = playbackState == Player.STATE_IDLE || playbackState == Player.STATE_BUFFERING,
         isPlaying = isPlaying,
@@ -1760,7 +1782,18 @@ private fun ExoPlayer.snapshot(): PlayerPlaybackSnapshot {
         playbackSpeed = playbackParameters.speed,
         videoWidth = videoWidth,
         videoHeight = videoHeight,
+        videoCodec = format?.codecs ?: format?.sampleMimeType,
+        videoDynamicRange = format?.videoDynamicRange(),
+        videoFrameRate = format?.frameRate?.takeIf { it.isFinite() && it > 0f },
     )
+}
+
+private fun Format.videoDynamicRange(): VideoDynamicRange? = when {
+    sampleMimeType == MimeTypes.VIDEO_DOLBY_VISION -> VideoDynamicRange.DolbyVision
+    colorInfo?.colorTransfer == C.COLOR_TRANSFER_HLG -> VideoDynamicRange.Hlg
+    colorInfo?.colorTransfer == C.COLOR_TRANSFER_ST2084 -> VideoDynamicRange.Hdr
+    colorInfo?.colorTransfer == C.COLOR_TRANSFER_SDR -> VideoDynamicRange.Sdr
+    else -> null
 }
 
 private fun ExoPlayer.videoDimensions(): Pair<Int, Int> {

@@ -33,6 +33,7 @@ fun snapToAllowedTimeout(value: Int): Int {
 
 data class PlayerSettingsUiState(
     val showLoadingOverlay: Boolean = true,
+    val showPlaybackDetails: Boolean = true,
     val showParentalGuide: Boolean = true,
     val resizeMode: PlayerResizeMode = PlayerResizeMode.Fit,
     val holdToSpeedEnabled: Boolean = true,
@@ -99,6 +100,7 @@ object PlayerSettingsRepository {
 
     private var hasLoaded = false
     private var showLoadingOverlay = true
+    private var showPlaybackDetails = true
     private var showParentalGuide = true
     private var resizeMode = PlayerResizeMode.Fit
     private var holdToSpeedEnabled = true
@@ -170,6 +172,7 @@ object PlayerSettingsRepository {
     fun clearLocalState() {
         hasLoaded = false
         showLoadingOverlay = true
+        showPlaybackDetails = true
         showParentalGuide = true
         resizeMode = PlayerResizeMode.Fit
         holdToSpeedEnabled = true
@@ -234,6 +237,7 @@ object PlayerSettingsRepository {
     private fun loadFromDisk() {
         hasLoaded = true
         showLoadingOverlay = PlayerSettingsStorage.loadShowLoadingOverlay() ?: true
+        showPlaybackDetails = PlayerSettingsStorage.loadShowPlaybackDetails() ?: true
         showParentalGuide = PlayerSettingsStorage.loadShowParentalGuide() ?: true
         resizeMode = PlayerSettingsStorage.loadResizeMode()
             ?.let { runCatching { PlayerResizeMode.valueOf(it) }.getOrNull() }
@@ -372,6 +376,14 @@ object PlayerSettingsRepository {
         showLoadingOverlay = enabled
         publish()
         PlayerSettingsStorage.saveShowLoadingOverlay(enabled)
+    }
+
+    fun setShowPlaybackDetails(enabled: Boolean) {
+        ensureLoaded()
+        if (showPlaybackDetails == enabled) return
+        showPlaybackDetails = enabled
+        publish()
+        PlayerSettingsStorage.saveShowPlaybackDetails(enabled)
     }
 
     fun setShowParentalGuide(enabled: Boolean) {
@@ -913,6 +925,7 @@ object PlayerSettingsRepository {
     private fun publish() {
         _uiState.value = PlayerSettingsUiState(
             showLoadingOverlay = showLoadingOverlay,
+            showPlaybackDetails = showPlaybackDetails,
             showParentalGuide = showParentalGuide,
             resizeMode = resizeMode,
             holdToSpeedEnabled = holdToSpeedEnabled,

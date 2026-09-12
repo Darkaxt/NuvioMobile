@@ -1,4 +1,4 @@
-name: Publish NuvioDV Android Prerelease
+name: Publish NuvioDV Android Release
 
 on:
   workflow_dispatch:
@@ -7,6 +7,11 @@ on:
         description: Exact synchronized commit to build and publish
         required: false
         type: string
+      prerelease:
+        description: Publish as a GitHub prerelease
+        required: true
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -153,7 +158,7 @@ jobs:
           path: ${{ steps.apk.outputs.path }}
           if-no-files-found: error
 
-      - name: Publish GitHub prerelease
+      - name: Publish GitHub release
         shell: bash
         env:
           RELEASE_TAG: ${{ steps.release.outputs.tag }}
@@ -163,10 +168,11 @@ jobs:
           APK_SHA256: ${{ steps.apk.outputs.sha256 }}
           SIGNER_SHA256: ${{ steps.apk.outputs.signer_sha256 }}
           SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+          IS_PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
           cat > release-notes.md <<EOF
-          Personal NuvioDV prerelease for ARM64 Android devices.
+          Personal NuvioDV release for ARM64 Android devices.
 
           - Package: \`com.darkaxt.nuviodv\`
           - Version: \`${RELEASE_VERSION}\`
@@ -174,12 +180,17 @@ jobs:
           - APK SHA-256: \`${APK_SHA256}\`
           - Signing certificate SHA-256: \`${SIGNER_SHA256}\`
           - Player: patched libmpv with libdovi and the independent libplacebo pink-screen correction
+          - Playback details: optional live resolution, codec, dynamic range, and frame-rate row
           - Authentication: Nuvio account, Trakt, and Simkl runtime configuration restored
 
           This is an unofficial personal fork of NuvioMobile. Full Dolby Vision Profile 7 FEL decoding is not claimed.
           EOF
-          gh release create "${RELEASE_TAG}" "${APK_PATH}" \
-            --target "${SOURCE_SHA}" \
-            --title "NuvioDV ${RELEASE_VERSION}" \
-            --notes-file release-notes.md \
-            --prerelease
+          release_args=(
+            --target "${SOURCE_SHA}"
+            --title "NuvioDV ${RELEASE_VERSION}"
+            --notes-file release-notes.md
+          )
+          if [[ "${IS_PRERELEASE}" == "true" ]]; then
+            release_args+=(--prerelease)
+          fi
+          gh release create "${RELEASE_TAG}" "${APK_PATH}" "${release_args[@]}"

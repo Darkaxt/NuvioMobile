@@ -1025,6 +1025,8 @@
     <string name="settings_playback_decoder_prefer_app">Preferir app (FFmpeg)</string>
     <string name="settings_playback_decoder_prefer_device">Preferir dispositivo</string>
     <string name="settings_playback_decoder_priority">Prioridad del decodificador</string>
+    <string name="settings_playback_show_details">Mostrar detalles de reproducción</string>
+    <string name="settings_playback_show_details_description">Muestra la resolución, el códec, el rango dinámico y la tasa de fotogramas en el reproductor.</string>
     <string name="settings_playback_dialog_close">Toca afuera para cerrar</string>
     <string name="settings_playback_dialog_save_close">Toca afuera para guardar y cerrar</string>
     <string name="settings_playback_duration_day_one">%1$d día</string>

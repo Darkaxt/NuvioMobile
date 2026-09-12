@@ -76,6 +76,13 @@ enum class PlayerResizeMode {
     Zoom,
 }
 
+enum class VideoDynamicRange(val label: String) {
+    DolbyVision("DV"),
+    Hdr("HDR"),
+    Hlg("HLG"),
+    Sdr("SDR"),
+}
+
 enum class AndroidPlaybackEngine(
     val label: String,
 ) {
@@ -219,6 +226,9 @@ data class PlayerPlaybackSnapshot(
     val playbackSpeed: Float = 1f,
     val videoWidth: Int = 0,
     val videoHeight: Int = 0,
+    val videoCodec: String? = null,
+    val videoDynamicRange: VideoDynamicRange? = null,
+    val videoFrameRate: Float? = null,
 )
 
 data class PlayerNowPlayingInfo(

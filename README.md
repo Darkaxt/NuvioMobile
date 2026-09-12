@@ -6,11 +6,14 @@
 > cover player gaps that are not yet addressed upstream. It is not an official
 > Nuvio build.
 
-NuvioDV currently covers two independent libmpv concerns:
+NuvioDV currently covers three focused player concerns:
 
-- improved Dolby Vision handling through a libdovi-enabled libmpv build; and
+- improved Dolby Vision handling through a libdovi-enabled libmpv build;
 - an included libplacebo correction relevant to the late-playback pink-screen
-  failure. The pink-screen issue is not being treated as a Dolby Vision issue.
+  failure—the pink-screen issue is not being treated as a Dolby Vision issue;
+  and
+- an optional player metadata row sourced from the active decoder, showing
+  resolution, codec, dynamic range, and frame rate.
 
 The Android app uses the package ID `com.darkaxt.nuviodv`, the visible name
 `NuvioDV`, and `NuvioDV-*.apk` output names, so it can be installed alongside
@@ -37,11 +40,11 @@ performed by the fork owner as real-world samples become available.
 Public NuvioDV builds are distributed as ARM64 APKs on this fork's
 [GitHub Releases](https://github.com/Darkaxt/NuvioMobile/releases) page. They
 are consistently signed by the fork's dedicated release key and can be tracked
-by release-monitoring clients such as Obtainium or ObtainX. Because these builds
-are prereleases, enable prerelease updates in the client if required.
+by release-monitoring clients such as Obtainium or ObtainX. Automated upstream
+builds are prereleases, while selected milestone builds may be normal releases.
 
 Future releases are produced by the Android-only
-`Publish NuvioDV Android Prerelease` workflow. It builds, signs, verifies, and
+`Publish NuvioDV Android Release` workflow. It builds, signs, verifies, and
 publishes the APK without invoking the inherited iOS or store-release paths.
 
 The `Sync NuvioDV with upstream` workflow checks the upstream `cmp-rewrite`
