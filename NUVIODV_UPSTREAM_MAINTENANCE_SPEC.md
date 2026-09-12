@@ -26,10 +26,17 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 
 | Stage | Status | Requirements | Verification |
 | --- | --- | --- | --- |
-| Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed all pending/live-arriving upstream commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15` so same-base syncs advance only the fork counter and older upstream versions fail closed |
+| Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed the initial pending commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15`; on 2026-09-13 run 34723027169 failed closed on four overlapping player-settings files plus the expected version conflict, after which the manual repair retained both upstream settings and NuvioDV playback details, passed focused tests and an integrated APK build, and prepared `0.4.18-nuviodv.1`/`12208` |
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
 | Final reconciliation | COMPLETE | M1-M9 | MC1-MC5 satisfied; fork contains current upstream, workflows and heartbeat active, public release verified, blockers and tracked deferrals equal zero |
 
 Blockers: none.
 
 Tracked deferrals: none.
+
+## 2026-09-13 sync incident
+
+- Upstream advanced by 33 commits after the preceding scheduled run and released Nuvio `0.4.18`.
+- The immediate manual dispatch failed closed before any push or release because upstream's loading-status and pause-overlay settings overlapped NuvioDV's playback-details setting in four repository/storage files; `Version.xcconfig` was the fifth conflict.
+- Manual resolution retained all three settings across the shared repository plus Android and iOS storage/sync paths.
+- Focused version/workflow contracts and the three affected Android player-settings tests passed; the integrated full debug APK built successfully as `0.4.18-nuviodv.1` with versionCode `12208`.

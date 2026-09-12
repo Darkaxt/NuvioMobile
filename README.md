@@ -78,7 +78,7 @@ manual maintenance; no commit or release is created when upstream is unchanged.
 
 - [Android on Google Play](https://play.google.com/store/apps/details?id=com.nuvio.app)
 - [Android APK](https://github.com/NuvioMedia/NuvioMobile/releases/latest)
-- iOS must be built from source.
+- iOS via AltStore or SideStore: add [this source URL](https://raw.githubusercontent.com/NuvioMedia/NuvioMobile/cmp-rewrite/store.json) in the app's Sources section, then install Nuvio.
 
 ## Build from source
 
