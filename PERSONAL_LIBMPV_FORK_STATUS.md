@@ -76,7 +76,7 @@ Authoritative specification: `PERSONAL_LIBMPV_FORK_SPEC.md`
 
 ## Stage 5 - Signed tablet-validation prerelease
 
-- Status: **ACTIVE**
+- Status: **COMPLETE**
 - Requirements: R7
 - Acceptance criteria: AC7
 - Verification required: protected persistent key creation, local signed APK
@@ -88,15 +88,24 @@ Authoritative specification: `PERSONAL_LIBMPV_FORK_SPEC.md`
   GitHub Actions secrets are configured; the Android-only workflow is defined;
   and a locally signed ARM64 release APK for `0.4.17-nuviodv.1`/`12201` passed
   package, label, V2 signature, signer-certificate, ELF architecture, unique
-  libmpv payload, and `dovi_parse_rpu` checks.
-- Acceptance criteria remaining: successful public workflow publication and
-  independent verification of the downloaded release asset
+  libmpv payload, and `dovi_parse_rpu` checks. Public workflow run
+  [34661560266](https://github.com/Darkaxt/NuvioMobile/actions/runs/34661560266)
+  completed successfully and published non-draft prerelease
+  [`v0.4.17-nuviodv.1`](https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.17-nuviodv.1).
+  An unauthenticated independent download of its only APK asset confirmed
+  package `com.darkaxt.nuviodv`, version `0.4.17-nuviodv.1`/`12201`, ARM64-only
+  native code, V2 signing certificate SHA-256
+  `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`,
+  APK SHA-256
+  `FD26E22A2BBE3A27D8B835FAEBD0B83C03B3049D58E256EE954257E9710423A0`,
+  and `dovi_parse_rpu`.
+- Acceptance criteria remaining: none
 - Blockers: none
 - Tracked deferrals: none
 
-## Revised final reconciliation
+## Final reconciliation
 
-- Requirements R1-R6: satisfied and verified
-- Requirement R7: active in Stage 5 following the owner's scope correction
+- Requirements R1-R7: satisfied and verified
+- Acceptance criteria AC1-AC7: satisfied and verified
 - Remaining blockers: none
 - Remaining tracked deferrals: none
