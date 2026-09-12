@@ -125,7 +125,11 @@ jobs:
 
       - name: Build the integrated Android application
         if: steps.upstream.outputs.has_updates == 'true'
-        run: ./gradlew :androidApp:assembleFullDebug --stacktrace
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > local.properties
+          ./gradlew :androidApp:assembleFullDebug --stacktrace
 
       - name: Verify the integrated debug APK
         if: steps.upstream.outputs.has_updates == 'true'

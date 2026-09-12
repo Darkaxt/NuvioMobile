@@ -34,6 +34,7 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
     def test_verifies_the_fork_before_push(self) -> None:
         self.assertIn("test_advance_nuviodv_version.py", self.workflow)
         self.assertIn("test-configure-nuviodv-release.sh", self.workflow)
+        self.assertIn(": > local.properties", self.workflow)
         self.assertIn(":androidApp:assembleFullDebug", self.workflow)
         self.assertIn("dovi_parse_rpu", self.workflow)
         self.assertIn("git push origin HEAD:cmp-rewrite", self.workflow)
