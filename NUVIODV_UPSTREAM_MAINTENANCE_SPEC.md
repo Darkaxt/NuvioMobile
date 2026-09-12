@@ -26,7 +26,7 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 
 | Stage | Status | Requirements | Verification |
 | --- | --- | --- | --- |
-| Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed all three pending/live-arriving upstream commits and verified their integrated APKs; public releases `0.4.19-nuviodv.1`/`12204` and `0.4.20-nuviodv.1`/`12205` published; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path skips every mutation and release step |
+| Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed all pending/live-arriving upstream commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15` so same-base syncs advance only the fork counter and older upstream versions fail closed |
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
 | Final reconciliation | COMPLETE | M1-M9 | MC1-MC5 satisfied; fork contains current upstream, workflows and heartbeat active, public release verified, blockers and tracked deferrals equal zero |
 

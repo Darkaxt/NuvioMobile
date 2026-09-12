@@ -43,6 +43,10 @@ are consistently signed by the fork's dedicated release key and can be tracked
 by release-monitoring clients such as Obtainium or ObtainX. Automated upstream
 builds are prereleases, while selected milestone builds may be normal releases.
 
+NuvioDV versions use `<upstream version>-nuviodv.<fork build>`. The semantic
+version on the left always matches the current upstream Nuvio release; only the
+final NuvioDV build counter advances while that upstream version is unchanged.
+
 Future releases are produced by the Android-only
 `Publish NuvioDV Android Release` workflow. It builds, signs, verifies, and
 publishes the APK without invoking the inherited iOS or store-release paths.

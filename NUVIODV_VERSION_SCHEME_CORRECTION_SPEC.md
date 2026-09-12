@@ -26,8 +26,17 @@ Authorization: `already_authorized` by the user's correction on 2026-09-12.
 | --- | --- | --- | --- |
 | Correct version contract and automation | COMPLETE | V1-V4 | Five focused version tests and six workflow contract tests pass; same-base increment, upstream reset, and regression rejection verified |
 | Correct build identity | COMPLETE | V5 | Debug APK verifies package `com.darkaxt.nuviodv`, versionCode `12207`, versionName `0.4.17-nuviodv.5`, label `NuvioDV`, and expected debug ABIs |
-| Repair public release lineage | ACTIVE | V6 | GitHub release/API and independent public APK verification |
+| Repair public release lineage | COMPLETE | V6 | Run `34690741856`; corrected normal release `v0.4.17-nuviodv.5` is GitHub latest; erroneous `.21` retained as superseded prerelease; public APK independently verified |
 
 Blockers: none.
 
 Tracked deferrals: none.
+
+## Final release evidence
+
+- Corrected normal release: `v0.4.17-nuviodv.5`, built from `61e4eb15f69b615b92f09aabd36337c6bb2fce84`.
+- Public APK identity: package `com.darkaxt.nuviodv`, versionCode `12207`, versionName `0.4.17-nuviodv.5`, label `NuvioDV`, ABI `arm64-v8a`.
+- APK SHA-256: `13D53F231353AD1BECAD77A6FA2EE69B76338BF3E15DF3C871BEBF83B83A1231`.
+- Signing certificate SHA-256: `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`.
+- Public `libmpv.so` exports `dovi_parse_rpu` and `dovi_parse_rpu_bin_file`.
+- GitHub's latest-release API resolves to the corrected normal release; `v0.4.21-nuviodv.1` is marked as a superseded prerelease rather than deleted.
