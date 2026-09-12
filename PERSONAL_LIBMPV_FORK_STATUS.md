@@ -109,3 +109,28 @@ Authoritative specification: `PERSONAL_LIBMPV_FORK_SPEC.md`
 - Acceptance criteria AC1-AC7: satisfied and verified
 - Remaining blockers: none
 - Remaining tracked deferrals: none
+
+## Stage 6 - Authenticated prerelease repair
+
+- Status: **COMPLETE**
+- Requirements: restore the runtime authentication configuration omitted from
+  the first personal-fork release and prevent another unconfigured publication
+- Verification required: red/green release-configuration test, fail-closed CI
+  validation, successful Android-only publication, and independent inspection
+  of the downloaded release asset
+- Acceptance criteria satisfied: the official embedded public Nuvio backend,
+  Trakt, and Simkl client configuration is stored in a dedicated GitHub Actions
+  secret; the workflow rejects missing or incomplete runtime properties and
+  verifies the generated Kotlin constants before publication; workflow run
+  [34663828236](https://github.com/Darkaxt/NuvioMobile/actions/runs/34663828236)
+  completed successfully and published prerelease
+  [`v0.4.17-nuviodv.2`](https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.17-nuviodv.2).
+  Independent download verification confirmed package `com.darkaxt.nuviodv`,
+  version `0.4.17-nuviodv.2`/`12202`, ARM64-only native code, signer continuity,
+  embedded Supabase/Trakt/Simkl configuration, AArch64 `libmpv`,
+  `dovi_parse_rpu`, and APK SHA-256
+  `9FA5031A5ABB56B6D91C9DF0B5FBFDDB8532DE294683D94BA9CD35FC5CCF4715`.
+- Device login verification: explicitly owned by the user after publication
+- Acceptance criteria remaining: none
+- Blockers: none
+- Tracked deferrals: none

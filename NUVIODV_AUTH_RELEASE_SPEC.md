@@ -24,9 +24,20 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | Stage | Status | Requirements | Verification |
 | --- | --- | --- | --- |
 | Restore authenticated release configuration | COMPLETE | R1, R2, R3 | Red test rejected the absent configuration script; green test rejects incomplete properties and accepts complete sanitized properties; GitHub runtime secret configured from official embedded client values |
-| Build and publish replacement prerelease | ACTIVE | R4, R5 | Generated-config validation, GitHub Actions run, downloaded-asset verification |
-| Final reconciliation | NOT STARTED | R1-R6 | AC1-AC5 checked; blockers and tracked deferrals equal zero |
+| Build and publish replacement prerelease | COMPLETE | R4, R5 | Run 34663828236 passed generated-config, APK, native, signature, upload, and publication checks; independent asset verification passed |
+| Final reconciliation | COMPLETE | R1-R6 | AC1-AC5 satisfied; device login verification remains user-owned under R6 |
 
 Blockers: none.
 
 Tracked deferrals: none.
+
+## Final evidence
+
+- Commit: `11a3a98c3d609c8209293f321a8c74010bf568e7`
+- Workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/34663828236`
+- Prerelease: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.17-nuviodv.2`
+- APK: `NuvioDV-0.4.17-nuviodv.2-arm64-v8a.apk`
+- APK SHA-256: `9FA5031A5ABB56B6D91C9DF0B5FBFDDB8532DE294683D94BA9CD35FC5CCF4715`
+- Independent verification: package `com.darkaxt.nuviodv`, version `0.4.17-nuviodv.2`/`12202`, label `NuvioDV`, ARM64-only payload, matching persistent signer, AArch64 `libmpv`, `dovi_parse_rpu`, and embedded Supabase/Trakt/Simkl configuration.
+- Final blockers: none.
+- Final tracked deferrals: none.
