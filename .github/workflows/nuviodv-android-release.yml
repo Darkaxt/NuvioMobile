@@ -2,6 +2,11 @@ name: Publish NuvioDV Android Prerelease
 
 on:
   workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Exact synchronized commit to build and publish
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -25,6 +30,8 @@ jobs:
     steps:
       - name: Check out source
         uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.source_sha || github.sha }}
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -38,12 +45,18 @@ jobs:
       - name: Read and validate release metadata
         id: release
         shell: bash
+        env:
+          REQUESTED_SOURCE_SHA: ${{ inputs.source_sha }}
         run: |
           set -euo pipefail
+          source_sha="$(git rev-parse HEAD)"
           version="$(sed -nE 's/^MARKETING_VERSION[[:space:]]*=[[:space:]]*(.+)$/\1/p' iosApp/Configuration/Version.xcconfig)"
           version_code="$(sed -nE 's/^CURRENT_PROJECT_VERSION[[:space:]]*=[[:space:]]*([0-9]+)$/\1/p' iosApp/Configuration/Version.xcconfig)"
           tag="v${version}"
 
+          if [[ -n "${REQUESTED_SOURCE_SHA}" ]]; then
+            [[ "${source_sha}" == "${REQUESTED_SOURCE_SHA}" ]]
+          fi
           [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-nuviodv\.[0-9]+$ ]]
           [[ "${version_code}" =~ ^[0-9]+$ ]]
           if gh release view "${tag}" >/dev/null 2>&1; then
@@ -54,6 +67,7 @@ jobs:
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
           echo "version_code=${version_code}" >> "${GITHUB_OUTPUT}"
           echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+          echo "source_sha=${source_sha}" >> "${GITHUB_OUTPUT}"
 
       - name: Validate release secrets
         shell: bash
@@ -148,6 +162,7 @@ jobs:
           APK_NAME: ${{ steps.apk.outputs.name }}
           APK_SHA256: ${{ steps.apk.outputs.sha256 }}
           SIGNER_SHA256: ${{ steps.apk.outputs.signer_sha256 }}
+          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
         run: |
           set -euo pipefail
           cat > release-notes.md <<EOF
@@ -164,7 +179,7 @@ jobs:
           This is an unofficial personal fork of NuvioMobile. Full Dolby Vision Profile 7 FEL decoding is not claimed.
           EOF
           gh release create "${RELEASE_TAG}" "${APK_PATH}" \
-            --target "${GITHUB_SHA}" \
+            --target "${SOURCE_SHA}" \
             --title "NuvioDV ${RELEASE_VERSION}" \
             --notes-file release-notes.md \
             --prerelease
