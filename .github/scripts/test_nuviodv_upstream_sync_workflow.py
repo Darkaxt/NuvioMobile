@@ -37,7 +37,10 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertIn(": > local.properties", self.workflow)
         self.assertIn(":androidApp:assembleFullDebug", self.workflow)
         self.assertIn("dovi_parse_rpu", self.workflow)
-        self.assertIn("git push origin HEAD:cmp-rewrite", self.workflow)
+        self.assertIn('RELEASE_TAG: v${{ steps.version.outputs.version_name }}', self.workflow)
+        self.assertIn('git tag -a "${RELEASE_TAG}"', self.workflow)
+        self.assertIn('git push --atomic origin HEAD:cmp-rewrite "refs/tags/${RELEASE_TAG}"', self.workflow)
+        self.assertIn('--ref "${RELEASE_TAG}"', self.workflow)
 
 
 if __name__ == "__main__":

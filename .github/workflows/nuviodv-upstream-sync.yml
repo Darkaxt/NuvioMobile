@@ -156,22 +156,26 @@ jobs:
           grep -Eq 'Machine:[[:space:]]+AArch64' "${RUNNER_TEMP}/libmpv-header.txt"
           grep -q 'dovi_parse_rpu' "${RUNNER_TEMP}/libmpv-symbols.txt"
 
-      - name: Commit and push the verified sync
+      - name: Commit, tag, and push the verified sync
         if: steps.upstream.outputs.has_updates == 'true'
         shell: bash
         env:
           UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
           VERSION_NAME: ${{ steps.version.outputs.version_name }}
           VERSION_CODE: ${{ steps.version.outputs.version_code }}
+          RELEASE_TAG: v${{ steps.version.outputs.version_name }}
         run: |
           set -euo pipefail
           git commit \
             -m "Sync upstream and prepare NuvioDV ${VERSION_NAME}" \
             -m "Upstream commit: ${UPSTREAM_SHA}" \
             -m "Android version code: ${VERSION_CODE}"
-          git push origin HEAD:cmp-rewrite
+          git tag -a "${RELEASE_TAG}" -m "NuvioDV ${VERSION_NAME} release candidate"
+          git push --atomic origin HEAD:cmp-rewrite "refs/tags/${RELEASE_TAG}"
 
       - name: Dispatch the authenticated prerelease
         if: steps.upstream.outputs.has_updates == 'true'
         shell: bash
-        run: gh workflow run nuviodv-android-release.yml --repo "${GITHUB_REPOSITORY}" --ref cmp-rewrite
+        env:
+          RELEASE_TAG: v${{ steps.version.outputs.version_name }}
+        run: gh workflow run nuviodv-android-release.yml --repo "${GITHUB_REPOSITORY}" --ref "${RELEASE_TAG}"
