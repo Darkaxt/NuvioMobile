@@ -65,11 +65,38 @@ Authoritative specification: `PERSONAL_LIBMPV_FORK_SPEC.md`
 - Blockers: none
 - Tracked deferrals: none
 
-## Final specification reconciliation
+## Stage 1-4 reconciliation
 
 - Requirements R1-R6: satisfied and verified
 - Acceptance criteria AC1-AC6: satisfied and verified
 - Remaining blockers: none
 - Remaining tracked deferrals: none
-- Explicitly out of scope: device playback validation, releases/publication,
-  iOS player changes, full Profile 7 FEL claims, and mpvEx feature expansion
+- Explicitly out of scope: device playback itself, app-store/iOS publication,
+  full Profile 7 FEL claims, and mpvEx feature expansion
+
+## Stage 5 - Signed tablet-validation prerelease
+
+- Status: **ACTIVE**
+- Requirements: R7
+- Acceptance criteria: AC7
+- Verification required: protected persistent key creation, local signed APK
+  verification, successful public Android-only workflow, and independent
+  verification of the downloaded GitHub release asset
+- Acceptance criteria satisfied: a dedicated 4096-bit RSA signing identity is
+  retained locally at `C:\Users\darka\.android\nuviodv-release.jks` with its
+  password stored only as a DPAPI-protected recovery record; four required
+  GitHub Actions secrets are configured; the Android-only workflow is defined;
+  and a locally signed ARM64 release APK for `0.4.17-nuviodv.1`/`12201` passed
+  package, label, V2 signature, signer-certificate, ELF architecture, unique
+  libmpv payload, and `dovi_parse_rpu` checks.
+- Acceptance criteria remaining: successful public workflow publication and
+  independent verification of the downloaded release asset
+- Blockers: none
+- Tracked deferrals: none
+
+## Revised final reconciliation
+
+- Requirements R1-R6: satisfied and verified
+- Requirement R7: active in Stage 5 following the owner's scope correction
+- Remaining blockers: none
+- Remaining tracked deferrals: none

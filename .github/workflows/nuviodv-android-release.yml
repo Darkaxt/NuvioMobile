@@ -1,0 +1,158 @@
+name: Publish NuvioDV Android Prerelease
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nuviodv-android-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build, verify, and publish ARM64 APK
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.NUVIODV_RELEASE_KEYSTORE_BASE64 }}
+      STORE_PASSWORD: ${{ secrets.NUVIODV_RELEASE_STORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.NUVIODV_RELEASE_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.NUVIODV_RELEASE_KEY_PASSWORD }}
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v6
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Read and validate release metadata
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -nE 's/^MARKETING_VERSION[[:space:]]*=[[:space:]]*(.+)$/\1/p' iosApp/Configuration/Version.xcconfig)"
+          version_code="$(sed -nE 's/^CURRENT_PROJECT_VERSION[[:space:]]*=[[:space:]]*([0-9]+)$/\1/p' iosApp/Configuration/Version.xcconfig)"
+          tag="v${version}"
+
+          [[ "${version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+-nuviodv\.[0-9]+$ ]]
+          [[ "${version_code}" =~ ^[0-9]+$ ]]
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "Release ${tag} already exists." >&2
+            exit 1
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "version_code=${version_code}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate signing secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          for secret_name in KEYSTORE_BASE64 STORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [[ -z "${!secret_name}" ]]; then
+              echo "Missing required GitHub Actions secret: ${secret_name}" >&2
+              exit 1
+            fi
+          done
+
+      - name: Configure release signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          keystore_path="${RUNNER_TEMP}/nuviodv-release.jks"
+          printf '%s' "${KEYSTORE_BASE64}" | base64 --decode > "${keystore_path}"
+          {
+            printf 'NUVIO_RELEASE_STORE_FILE=%s\n' "${keystore_path}"
+            printf 'NUVIO_RELEASE_STORE_PASSWORD=%s\n' "${STORE_PASSWORD}"
+            printf 'NUVIO_RELEASE_KEY_ALIAS=%s\n' "${KEY_ALIAS}"
+            printf 'NUVIO_RELEASE_KEY_PASSWORD=%s\n' "${KEY_PASSWORD}"
+          } > local.properties
+
+      - name: Build signed release APKs
+        run: ./gradlew :androidApp:assembleFullRelease --stacktrace
+
+      - name: Verify ARM64 release APK
+        id: apk
+        shell: bash
+        env:
+          EXPECTED_VERSION: ${{ steps.release.outputs.version }}
+          EXPECTED_VERSION_CODE: ${{ steps.release.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          source_apk="androidApp/build/outputs/apk/full/release/NuvioDV-fullRelease-arm64-v8a.apk"
+          published_apk="release-assets/NuvioDV-${EXPECTED_VERSION}-arm64-v8a.apk"
+          [[ -f "${source_apk}" ]]
+          mkdir -p release-assets
+          cp "${source_apk}" "${published_apk}"
+
+          build_tools="$(find "${ANDROID_HOME}/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -n 1)"
+          aapt2="${ANDROID_HOME}/build-tools/${build_tools}/aapt2"
+          apksigner="${ANDROID_HOME}/build-tools/${build_tools}/apksigner"
+          badging="$(${aapt2} dump badging "${published_apk}")"
+          grep -Fq "package: name='com.darkaxt.nuviodv' versionCode='${EXPECTED_VERSION_CODE}' versionName='${EXPECTED_VERSION}'" <<< "${badging}"
+          grep -Fq "application-label:'NuvioDV'" <<< "${badging}"
+
+          mapfile -t mpv_entries < <(unzip -Z1 "${published_apk}" | grep -E '^lib/.*/libmpv\.so$')
+          [[ "${#mpv_entries[@]}" -eq 1 ]]
+          [[ "${mpv_entries[0]}" == 'lib/arm64-v8a/libmpv.so' ]]
+          unzip -p "${published_apk}" 'lib/arm64-v8a/libmpv.so' > "${RUNNER_TEMP}/libmpv.so"
+          readelf -h "${RUNNER_TEMP}/libmpv.so" > "${RUNNER_TEMP}/libmpv-header.txt"
+          readelf -Ws "${RUNNER_TEMP}/libmpv.so" > "${RUNNER_TEMP}/libmpv-symbols.txt"
+          grep -Eq 'Machine:[[:space:]]+AArch64' "${RUNNER_TEMP}/libmpv-header.txt"
+          grep -q 'dovi_parse_rpu' "${RUNNER_TEMP}/libmpv-symbols.txt"
+
+          "${apksigner}" verify --verbose --print-certs "${published_apk}" | tee "${RUNNER_TEMP}/apksigner.txt"
+          sha256="$(sha256sum "${published_apk}" | cut -d ' ' -f 1 | tr '[:lower:]' '[:upper:]')"
+          signer_sha256="$(sed -nE 's/^Signer #1 certificate SHA-256 digest: (.+)$/\1/p; s/^V2 Signer.*certificate SHA-256 digest: (.+)$/\1/p' "${RUNNER_TEMP}/apksigner.txt" | head -n 1 | tr '[:lower:]' '[:upper:]')"
+          [[ -n "${signer_sha256}" ]]
+
+          echo "path=${published_apk}" >> "${GITHUB_OUTPUT}"
+          echo "name=$(basename "${published_apk}")" >> "${GITHUB_OUTPUT}"
+          echo "sha256=${sha256}" >> "${GITHUB_OUTPUT}"
+          echo "signer_sha256=${signer_sha256}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload verified workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: NuvioDV-${{ steps.release.outputs.version }}-arm64-v8a
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error
+
+      - name: Publish GitHub prerelease
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+          APK_PATH: ${{ steps.apk.outputs.path }}
+          APK_NAME: ${{ steps.apk.outputs.name }}
+          APK_SHA256: ${{ steps.apk.outputs.sha256 }}
+          SIGNER_SHA256: ${{ steps.apk.outputs.signer_sha256 }}
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<EOF
+          Personal NuvioDV prerelease for ARM64 Android devices.
+
+          - Package: \`com.darkaxt.nuviodv\`
+          - Version: \`${RELEASE_VERSION}\`
+          - APK: \`${APK_NAME}\`
+          - APK SHA-256: \`${APK_SHA256}\`
+          - Signing certificate SHA-256: \`${SIGNER_SHA256}\`
+          - Player: patched libmpv with libdovi and the independent libplacebo pink-screen correction
+
+          This is an unofficial personal fork of NuvioMobile. Full Dolby Vision Profile 7 FEL decoding is not claimed.
+          EOF
+          gh release create "${RELEASE_TAG}" "${APK_PATH}" \
+            --target "${GITHUB_SHA}" \
+            --title "NuvioDV ${RELEASE_VERSION}" \
+            --notes-file release-notes.md \
+            --prerelease

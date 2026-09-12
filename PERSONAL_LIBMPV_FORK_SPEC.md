@@ -58,6 +58,20 @@ The existing Kotlin namespace and source packages may remain `com.nuvio.app`;
 renaming them is not required for Android package isolation and would create
 unnecessary source churn.
 
+### R7. Tablet-installable public prerelease
+
+The fork must provide a non-draft GitHub prerelease containing a consistently
+signed ARM64 Android APK so that release-monitoring clients such as Obtainium
+or ObtainX can discover, download, install, and update NuvioDV independently of
+the standard Nuvio package.
+
+The signing identity must be persistent rather than an ephemeral CI key. Its
+private material must not be committed: retain a protected local recovery copy
+and reconstruct the CI keystore from GitHub Actions secrets. The publication
+workflow must be Android-only, must verify the APK package, version, signature,
+and embedded ARM64 libmpv payload before publishing, and must not invoke the
+upstream iOS or store-release paths.
+
 ## Explicit limits
 
 - ARM64 Android only for the libmpv native payload.
@@ -65,7 +79,7 @@ unnecessary source churn.
 - No mpvEx features or generalized player expansion.
 - No iOS/MPVKit changes.
 - No Kotlin namespace or source-package rename.
-- No GitHub release, store publication, or Maven publication in this scope.
+- No app-store, iOS, or Maven publication in this scope.
 - Device playback validation is intentionally left to the repository owner.
 
 ## Acceptance criteria
@@ -80,3 +94,6 @@ unnecessary source churn.
   `dovi_parse_rpu`.
 - AC6: the generated APK has application ID `com.darkaxt.nuviodv`, presents
   itself as `NuvioDV`, and uses a filename beginning with `NuvioDV-`.
+- AC7: a public, non-draft GitHub prerelease exposes the signed ARM64 APK; an
+  independently downloaded copy has the expected checksum, application ID,
+  version, signing certificate, and `dovi_parse_rpu` native symbol.

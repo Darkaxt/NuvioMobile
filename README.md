@@ -34,8 +34,15 @@ The native libmpv payload is ARM64-only. This integration does not claim full
 Dolby Vision Profile 7 FEL decoding. Device playback validation is intentionally
 performed by the fork owner as real-world samples become available.
 
-No NuvioDV release is currently published; build it locally using the Android
-instructions below.
+Public NuvioDV builds are distributed as ARM64 APKs on this fork's
+[GitHub Releases](https://github.com/Darkaxt/NuvioMobile/releases) page. They
+are consistently signed by the fork's dedicated release key and can be tracked
+by release-monitoring clients such as Obtainium or ObtainX. Because these builds
+are prereleases, enable prerelease updates in the client if required.
+
+Future releases are produced by the Android-only
+`Publish NuvioDV Android Prerelease` workflow. It builds, signs, verifies, and
+publishes the APK without invoking the inherited iOS or store-release paths.
 
 ## Upstream project
 
