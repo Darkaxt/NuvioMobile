@@ -1,0 +1,173 @@
+name: Sync NuvioDV with upstream
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: nuviodv-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge, verify, push, and release upstream updates
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Check out the maintained fork branch
+        uses: actions/checkout@v6
+        with:
+          ref: cmp-rewrite
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Fetch and detect upstream changes
+        id: upstream
+        shell: bash
+        run: |
+          set -euo pipefail
+          git remote add upstream https://github.com/NuvioMedia/NuvioMobile.git
+          git fetch --no-tags upstream cmp-rewrite
+          upstream_sha="$(git rev-parse upstream/cmp-rewrite)"
+
+          if git merge-base --is-ancestor upstream/cmp-rewrite HEAD; then
+            echo "has_updates=false" >> "${GITHUB_OUTPUT}"
+            echo "The fork already contains upstream ${upstream_sha}."
+            exit 0
+          fi
+
+          git show upstream/cmp-rewrite:iosApp/Configuration/Version.xcconfig \
+            > "${RUNNER_TEMP}/upstream-version.xcconfig"
+          echo "has_updates=true" >> "${GITHUB_OUTPUT}"
+          echo "sha=${upstream_sha}" >> "${GITHUB_OUTPUT}"
+
+      - name: Merge upstream history
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          allowed_conflict='iosApp/Configuration/Version.xcconfig'
+
+          set +e
+          git merge --no-commit --no-ff upstream/cmp-rewrite
+          merge_status=$?
+          set -e
+
+          if [[ "${merge_status}" -ne 0 ]]; then
+            mapfile -t conflicts < <(git diff --name-only --diff-filter=U)
+            if [[ "${#conflicts[@]}" -ne 1 ]] || \
+               ! [[ "${conflicts[0]}" == "${allowed_conflict}" ]]; then
+              printf 'Upstream merge requires manual conflict resolution:\n' >&2
+              printf '  %s\n' "${conflicts[@]}" >&2
+              git merge --abort
+              exit 1
+            fi
+            git checkout --ours -- "${allowed_conflict}"
+            git add "${allowed_conflict}"
+          fi
+
+          mapfile -t unresolved < <(git diff --name-only --diff-filter=U)
+          if [[ "${#unresolved[@]}" -ne 0 ]]; then
+            printf 'Unresolved merge conflicts remain:\n' >&2
+            printf '  %s\n' "${unresolved[@]}" >&2
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Advance the NuvioDV release version
+        if: steps.upstream.outputs.has_updates == 'true'
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/advance_nuviodv_version.py \
+            --fork-config iosApp/Configuration/Version.xcconfig \
+            --upstream-config "${RUNNER_TEMP}/upstream-version.xcconfig" \
+            --github-output "${GITHUB_OUTPUT}"
+          git add iosApp/Configuration/Version.xcconfig
+
+      - name: Verify sync automation contracts
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python .github/scripts/test_advance_nuviodv_version.py
+          python .github/scripts/test_nuviodv_upstream_sync_workflow.py
+          bash .github/scripts/test-configure-nuviodv-release.sh
+
+      - name: Verify NuvioDV fork invariants
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq 'applicationId = "com.darkaxt.nuviodv"' androidApp/build.gradle.kts
+          grep -Fq '<string name="app_name">NuvioDV</string>' androidApp/src/debug/res/values/strings.xml
+          grep -Fq '<string name="app_name">NuvioDV</string>' composeApp/src/androidMain/res/values/strings.xml
+          test "$(sha256sum composeApp/libs/lib-mpv-android-libdovi-arm64.aar | cut -d ' ' -f 1)" = \
+            'b266c9f5ed940b761da572f1496fcf2152fe624cdfd42354b33ba5c9e3fc8721'
+
+      - name: Build the integrated Android application
+        if: steps.upstream.outputs.has_updates == 'true'
+        run: ./gradlew :androidApp:assembleFullDebug --stacktrace
+
+      - name: Verify the integrated debug APK
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.version_name }}
+          EXPECTED_VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          apk='androidApp/build/outputs/apk/full/debug/NuvioDV-fullDebug.apk'
+          test -f "${apk}"
+          build_tools="$(find "${ANDROID_HOME}/build-tools" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort -V | tail -n 1)"
+          aapt2="${ANDROID_HOME}/build-tools/${build_tools}/aapt2"
+          badging="$(${aapt2} dump badging "${apk}")"
+          grep -Fq "package: name='com.darkaxt.nuviodv' versionCode='${EXPECTED_VERSION_CODE}' versionName='${EXPECTED_VERSION}'" <<< "${badging}"
+          grep -Fq "application-label:'NuvioDV'" <<< "${badging}"
+
+          mapfile -t mpv_entries < <(unzip -Z1 "${apk}" | grep -E '^lib/.*/libmpv\.so$')
+          [[ "${#mpv_entries[@]}" -eq 1 ]]
+          [[ "${mpv_entries[0]}" == 'lib/arm64-v8a/libmpv.so' ]]
+          unzip -p "${apk}" 'lib/arm64-v8a/libmpv.so' > "${RUNNER_TEMP}/libmpv.so"
+          readelf -h "${RUNNER_TEMP}/libmpv.so" > "${RUNNER_TEMP}/libmpv-header.txt"
+          readelf -Ws "${RUNNER_TEMP}/libmpv.so" > "${RUNNER_TEMP}/libmpv-symbols.txt"
+          grep -Eq 'Machine:[[:space:]]+AArch64' "${RUNNER_TEMP}/libmpv-header.txt"
+          grep -q 'dovi_parse_rpu' "${RUNNER_TEMP}/libmpv-symbols.txt"
+
+      - name: Commit and push the verified sync
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        env:
+          UPSTREAM_SHA: ${{ steps.upstream.outputs.sha }}
+          VERSION_NAME: ${{ steps.version.outputs.version_name }}
+          VERSION_CODE: ${{ steps.version.outputs.version_code }}
+        run: |
+          set -euo pipefail
+          git commit \
+            -m "Sync upstream and prepare NuvioDV ${VERSION_NAME}" \
+            -m "Upstream commit: ${UPSTREAM_SHA}" \
+            -m "Android version code: ${VERSION_CODE}"
+          git push origin HEAD:cmp-rewrite
+
+      - name: Dispatch the authenticated prerelease
+        if: steps.upstream.outputs.has_updates == 'true'
+        shell: bash
+        run: gh workflow run nuviodv-android-release.yml --repo "${GITHUB_REPOSITORY}" --ref cmp-rewrite

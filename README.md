@@ -44,6 +44,13 @@ Future releases are produced by the Android-only
 `Publish NuvioDV Android Prerelease` workflow. It builds, signs, verifies, and
 publishes the APK without invoking the inherited iOS or store-release paths.
 
+The `Sync NuvioDV with upstream` workflow checks the upstream `cmp-rewrite`
+branch daily. When new commits exist, it merges their history, advances both
+the release-visible base version and Android version code, verifies the fork's
+identity and patched player in a full Android build, pushes the merge, and then
+dispatches the prerelease workflow. Unexpected merge conflicts fail closed for
+manual maintenance; no commit or release is created when upstream is unchanged.
+
 ## Upstream project
 
 <div align="center">

@@ -28,8 +28,8 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | --- | --- | --- | --- |
 | Restore authenticated release configuration | COMPLETE | R1, R2, R3 | Red test rejected the absent configuration script; green test rejects incomplete properties and accepts complete sanitized properties; GitHub runtime secret configured from official embedded client values |
 | Build and publish authenticated prerelease | COMPLETE | R4, R5 | Run 34663828236 passed generated-config, APK, native, signature, upload, and publication checks; independent asset verification passed |
-| Publish ObtainX-distinguishable replacement | ACTIVE | R7 | Base-version regression reproduced; publish and inspect `0.4.18-nuviodv.1`/`12203` |
-| Final reconciliation | NOT STARTED | R1-R7 | AC1-AC7 checked; blockers and tracked deferrals equal zero |
+| Publish ObtainX-distinguishable replacement | COMPLETE | R7 | Base-version regression reproduced; run 34664739133 published `0.4.18-nuviodv.1`/`12203`; public APK metadata independently verified |
+| Final reconciliation | COMPLETE | R1-R7 | AC1-AC7 satisfied; user confirmed login works on the tablet |
 
 Blockers: none.
 
@@ -44,5 +44,6 @@ Tracked deferrals: none.
 - APK SHA-256: `9FA5031A5ABB56B6D91C9DF0B5FBFDDB8532DE294683D94BA9CD35FC5CCF4715`
 - Independent verification: package `com.darkaxt.nuviodv`, version `0.4.17-nuviodv.2`/`12202`, label `NuvioDV`, ARM64-only payload, matching persistent signer, AArch64 `libmpv`, `dovi_parse_rpu`, and embedded Supabase/Trakt/Simkl configuration.
 - Device verification: the user confirmed that login works on the tablet.
+- ObtainX-distinguishable replacement: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.18-nuviodv.1`, version `0.4.18-nuviodv.1`/`12203`, APK SHA-256 `DAFABBED4D76FC39FA0D72860BD1D8C7A37C2FA187416943E5A7643CB43A771A`.
 - Final blockers: none.
 - Final tracked deferrals: none.

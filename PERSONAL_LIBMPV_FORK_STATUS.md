@@ -134,3 +134,22 @@ Authoritative specification: `PERSONAL_LIBMPV_FORK_SPEC.md`
 - Acceptance criteria remaining: none
 - Blockers: none
 - Tracked deferrals: none
+
+## Stage 7 - ObtainX-distinguishable authenticated release
+
+- Status: **COMPLETE**
+- Requirements: advance both the release-visible semantic-version core and the
+  Android internal version counter after ObtainX normalized the first two
+  `0.4.17-nuviodv.N` tags to the same pseudo-version
+- Acceptance criteria satisfied: workflow run
+  [34664739133](https://github.com/Darkaxt/NuvioMobile/actions/runs/34664739133)
+  published prerelease
+  [`v0.4.18-nuviodv.1`](https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.18-nuviodv.1),
+  and an independent download reports version name `0.4.18-nuviodv.1`, version
+  code `12203`, package `com.darkaxt.nuviodv`, label `NuvioDV`, ARM64-only
+  native code, and APK SHA-256
+  `DAFABBED4D76FC39FA0D72860BD1D8C7A37C2FA187416943E5A7643CB43A771A`.
+  The user separately confirmed that login works on the tablet.
+- Acceptance criteria remaining: none
+- Blockers: none
+- Tracked deferrals: none
