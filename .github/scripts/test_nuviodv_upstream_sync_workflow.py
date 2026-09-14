@@ -52,6 +52,12 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertIn("SOURCE_SHA: ${{ steps.release.outputs.source_sha }}", self.release_workflow)
         self.assertIn('--target "${SOURCE_SHA}"', self.release_workflow)
 
+    def test_all_published_builds_are_normal_releases(self) -> None:
+        self.assertIn("Dispatch the authenticated release", self.workflow)
+        self.assertNotIn("authenticated prerelease", self.workflow)
+        self.assertNotIn("prerelease:", self.release_workflow)
+        self.assertNotIn("--prerelease", self.release_workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

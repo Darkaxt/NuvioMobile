@@ -7,11 +7,6 @@ on:
         description: Exact synchronized commit to build and publish
         required: false
         type: string
-      prerelease:
-        description: Publish as a GitHub prerelease
-        required: true
-        default: true
-        type: boolean
 
 permissions:
   contents: write
@@ -168,7 +163,6 @@ jobs:
           APK_SHA256: ${{ steps.apk.outputs.sha256 }}
           SIGNER_SHA256: ${{ steps.apk.outputs.signer_sha256 }}
           SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
-          IS_PRERELEASE: ${{ inputs.prerelease }}
         run: |
           set -euo pipefail
           cat > release-notes.md <<EOF
@@ -185,12 +179,7 @@ jobs:
 
           This is an unofficial personal fork of NuvioMobile. Full Dolby Vision Profile 7 FEL decoding is not claimed.
           EOF
-          release_args=(
-            --target "${SOURCE_SHA}"
-            --title "NuvioDV ${RELEASE_VERSION}"
+          gh release create "${RELEASE_TAG}" "${APK_PATH}" \
+            --target "${SOURCE_SHA}" \
+            --title "NuvioDV ${RELEASE_VERSION}" \
             --notes-file release-notes.md
-          )
-          if [[ "${IS_PRERELEASE}" == "true" ]]; then
-            release_args+=(--prerelease)
-          fi
-          gh release create "${RELEASE_TAG}" "${APK_PATH}" "${release_args[@]}"

@@ -40,8 +40,8 @@ performed by the fork owner as real-world samples become available.
 Public NuvioDV builds are distributed as ARM64 APKs on this fork's
 [GitHub Releases](https://github.com/Darkaxt/NuvioMobile/releases) page. They
 are consistently signed by the fork's dedicated release key and can be tracked
-by release-monitoring clients such as Obtainium or ObtainX. Automated upstream
-builds are prereleases, while selected milestone builds may be normal releases.
+by release-monitoring clients such as Obtainium or ObtainX. Every published build
+is a normal release so update clients see one monotonic release lineage.
 
 NuvioDV versions use `<upstream version>-nuviodv.<fork build>`. The semantic
 version on the left always matches the current upstream Nuvio release; only the
@@ -55,7 +55,7 @@ The `Sync NuvioDV with upstream` workflow checks the upstream `cmp-rewrite`
 branch daily. When new commits exist, it merges their history, advances both
 the release-visible base version and Android version code, verifies the fork's
 identity and patched player in a full Android build, pushes the merge, and then
-dispatches the prerelease workflow. Unexpected merge conflicts fail closed for
+dispatches the release workflow. Unexpected merge conflicts fail closed for
 manual maintenance; no commit or release is created when upstream is unchanged.
 
 ## Upstream project

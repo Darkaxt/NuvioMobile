@@ -173,7 +173,7 @@ jobs:
           echo "sha=$(git rev-parse HEAD)" >> "${GITHUB_OUTPUT}"
           git push origin HEAD:cmp-rewrite
 
-      - name: Dispatch the authenticated prerelease
+      - name: Dispatch the authenticated release
         if: steps.upstream.outputs.has_updates == 'true'
         shell: bash
         env:

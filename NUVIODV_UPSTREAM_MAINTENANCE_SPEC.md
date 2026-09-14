@@ -9,18 +9,22 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - M3: When upstream commits are missing, merge their history into the fork without discarding NuvioDV changes. The workflow may automatically preserve the fork's `iosApp/Configuration/Version.xcconfig` during a conflict limited to that file; any other merge conflict must fail closed for manual repair.
 - M4: Each synchronized release must retain the exact current upstream semantic version as its base and advance the Android version code. If upstream remains on the same version, increment only the `-nuviodv.#` fork counter; if upstream advances its version, adopt it and reset the fork counter to `1`; fail closed if upstream appears older than the fork base.
 - M5: Before pushing, verify the NuvioDV package identity, app label, local patched libmpv dependency, authenticated-release test, and a full Android debug APK build. A failed invariant or build must prevent the push and release.
-- M6: After pushing the verified sync commit, dispatch the authenticated NuvioDV prerelease workflow with that exact commit as an explicit checkout input. Branch-ref propagation must not be allowed to publish an older commit.
+- M6: After pushing the verified sync commit, dispatch the authenticated NuvioDV release workflow with that exact commit as an explicit checkout input. Every published NuvioDV build must be a normal GitHub release; branch-ref propagation must not be allowed to publish an older commit.
 - M7: A recurring Codex check must run every three days. It must inspect upstream divergence and daily-workflow/release results; if GitHub automation failed or left commits unsynchronized, it is authorized to diagnose, make the minimal fork-preserving repair, verify, commit, push, and trigger the release itself.
 - M8: The three-day check must also inspect new or newly updated open upstream issues for playback problems relevant to NuvioDV, libmpv, Dolby Vision, libplacebo/pink output, hardware decoding, renderer/color-format behavior, subtitles/audio interaction, or long-playback pipeline failure.
 - M9: Issue monitoring must not comment on upstream issues or automatically broaden the fork. It reports only evidence-backed candidates worth considering and stays quiet when neither maintenance nor issue triage produces an actionable change.
+- M10: Public release history must contain only tags whose left-side version matches the upstream release represented by their source commit. Superseded misnumbered releases and tags must be removed after their audit metadata is recorded.
+- M11: The canonical retained releases are `v0.4.17-nuviodv.5`, `v0.4.18-nuviodv.1`, `v0.4.18-nuviodv.2`, and `v0.4.19-nuviodv.1`; all four must be normal releases, and `v0.4.19-nuviodv.1` must remain the latest release.
 
 ## Acceptance criteria
 
 - MC1: Version-advance tests prove same-base fork-counter increments, newer-upstream resets, older-upstream rejection, and a higher Android version code.
 - MC2: The daily workflow parses, has write permissions needed for source sync and release dispatch, and contains fail-closed merge/build behavior.
-- MC3: A manual workflow dispatch consumes the currently pending upstream commits, preserves fork invariants, pushes the verified merge, and dispatches a successful authenticated prerelease.
+- MC3: A manual workflow dispatch consumes the currently pending upstream commits, preserves fork invariants, pushes the verified merge, and dispatches a successful authenticated normal release.
 - MC4: A three-day Codex heartbeat is active with the authorized remediation and playback-issue scope.
 - MC5: Repository changes and maintenance evidence are committed and pushed to `cmp-rewrite`.
+- MC6: Release-policy tests reject prerelease inputs/flags and prove the daily sync dispatches the normal release workflow.
+- MC7: A fresh GitHub API audit proves only the four canonical releases/tags remain, all are normal releases, and the latest release is `v0.4.19-nuviodv.1`.
 
 ## Stage and reconciliation ledger
 
@@ -28,9 +32,10 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | --- | --- | --- | --- |
 | Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed the initial pending commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15`; on 2026-09-13 run 34723027169 failed closed on four overlapping player-settings files plus the expected version conflict, after which merge `b62001d` retained both upstream settings and NuvioDV playback details and release run 34723777285 published verified prerelease `v0.4.18-nuviodv.1`; on 2026-09-14 sync run 34786755533 consumed seven upstream commits without conflicts and release run 34787071223 published verified prerelease `v0.4.19-nuviodv.1` from exact source `4ea1125` |
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
-| Final reconciliation | COMPLETE | M1-M9 | MC1-MC5 satisfied; fork contains current upstream, workflows and heartbeat active, public release verified, blockers and tracked deferrals equal zero |
+| Public release-lineage repair | ACTIVE | M6, M10-M11 | MC6 test is red against the former prerelease workflow; exact keep/delete manifest recorded from GitHub release/tag/source/upstream-base evidence |
+| Final reconciliation | NOT STARTED | M1-M11 | Requires MC1-MC7 with blockers and tracked deferrals equal zero |
 
-Blockers: none.
+Blockers: public release cleanup and normal-release workflow conversion are not yet complete.
 
 Tracked deferrals: none.
 
