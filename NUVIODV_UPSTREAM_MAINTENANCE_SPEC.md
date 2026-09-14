@@ -60,6 +60,7 @@ Tracked deferrals: none.
 
 - Root cause: automated sync releases were explicitly configured as prereleases, while four earlier builds used invented left-side versions that did not match their actual upstream base. Update clients consequently saw installed `0.4.21-nuviodv.1` as newer than canonical `0.4.19-nuviodv.1` even though the latter had the higher Android versionCode.
 - Commit `3f063f84` removed the prerelease workflow input and `--prerelease` publication branch. Daily syncs now dispatch only normal releases, matching the upstream project's delivery model and providing one monotonic public feed.
+- The active three-day `maintain-nuviodv-upstream-fork` automation was updated to inspect and dispatch the normal-release workflow and to reject draft/prerelease publication.
 - Deleted invalid release/tag `v0.4.17-nuviodv.1`: source `2a0c0aa`, actual upstream base `0.4.16`, APK SHA-256 `FD26E22A2BBE3A27D8B835FAEBD0B83C03B3049D58E256EE954257E9710423A0`, six downloads.
 - Deleted invalid release/tag `v0.4.17-nuviodv.2`: source `11a3a98`, actual upstream base `0.4.16`, APK SHA-256 `9FA5031A5ABB56B6D91C9DF0B5FBFDDB8532DE294683D94BA9CD35FC5CCF4715`, four downloads.
 - Deleted invalid release/tag `v0.4.20-nuviodv.1`: tag source `ddecc19`, actual upstream base `0.4.17`, APK SHA-256 `F30C8D29E4EC2AF851B354BFE633F05374A47D25FB0D32ED96CEC3EA798810EF`, one download.
