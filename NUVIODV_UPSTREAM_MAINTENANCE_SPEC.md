@@ -32,10 +32,10 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | --- | --- | --- | --- |
 | Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed the initial pending commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15`; on 2026-09-13 run 34723027169 failed closed on four overlapping player-settings files plus the expected version conflict, after which merge `b62001d` retained both upstream settings and NuvioDV playback details and release run 34723777285 published verified prerelease `v0.4.18-nuviodv.1`; on 2026-09-14 sync run 34786755533 consumed seven upstream commits without conflicts and release run 34787071223 published verified prerelease `v0.4.19-nuviodv.1` from exact source `4ea1125` |
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
-| Public release-lineage repair | ACTIVE | M6, M10-M11 | MC6 test is red against the former prerelease workflow; exact keep/delete manifest recorded from GitHub release/tag/source/upstream-base evidence |
-| Final reconciliation | NOT STARTED | M1-M11 | Requires MC1-MC7 with blockers and tracked deferrals equal zero |
+| Public release-lineage repair | COMPLETE | M6, M10-M11 | Commit `3f063f84` removed the prerelease input/flag paths and made normal releases the enforced workflow contract; invalid releases/tags `v0.4.17-nuviodv.1`, `v0.4.17-nuviodv.2`, `v0.4.20-nuviodv.1`, and `v0.4.21-nuviodv.1` were deleted; the four canonical releases remain, all normal, with `v0.4.19-nuviodv.1` Latest |
+| Final reconciliation | COMPLETE | M1-M11 | MC1-MC7 satisfied; fork contains current upstream, workflows and heartbeat active, canonical public release history verified, blockers and tracked deferrals equal zero |
 
-Blockers: public release cleanup and normal-release workflow conversion are not yet complete.
+Blockers: none.
 
 Tracked deferrals: none.
 
@@ -55,3 +55,13 @@ Tracked deferrals: none.
 - The first release dispatch failed closed because obsolete prerelease/tag `v0.4.19-nuviodv.1`, created from commit `3dfb5cb` while its upstream merge parent was still Nuvio `0.4.17`, occupied the corrected canonical tag. Its APK checksum `58FFEA699A7806D142EA62E663668BEE0AAC3CA365006FD36FF5356FE645CF7D`, publication time, two-download count, and target commit were recorded before deleting that obsolete release/tag; its source commit remains in history.
 - Release run `34787071223` succeeded against exact source commit `4ea112503236b6b7b4d16dfcbac4a6ecd6db667c` and published prerelease `v0.4.19-nuviodv.1`.
 - Independent download verification confirmed APK SHA-256 `E0D042B78CFDF1C7F7EDC7BFE395EB0B1E8F9E3CED345D0CCE391D0F24D3E4A6`, package `com.darkaxt.nuviodv`, label `NuvioDV`, versionCode `12210`, versionName `0.4.19-nuviodv.1`, ARM64-only native code, APK Signature Scheme v2, signer certificate SHA-256 `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, and exported `dovi_parse_rpu` plus `dovi_parse_rpu_bin_file` symbols in `libmpv.so`.
+
+## 2026-09-14 public release-lineage repair
+
+- Root cause: automated sync releases were explicitly configured as prereleases, while four earlier builds used invented left-side versions that did not match their actual upstream base. Update clients consequently saw installed `0.4.21-nuviodv.1` as newer than canonical `0.4.19-nuviodv.1` even though the latter had the higher Android versionCode.
+- Commit `3f063f84` removed the prerelease workflow input and `--prerelease` publication branch. Daily syncs now dispatch only normal releases, matching the upstream project's delivery model and providing one monotonic public feed.
+- Deleted invalid release/tag `v0.4.17-nuviodv.1`: source `2a0c0aa`, actual upstream base `0.4.16`, APK SHA-256 `FD26E22A2BBE3A27D8B835FAEBD0B83C03B3049D58E256EE954257E9710423A0`, six downloads.
+- Deleted invalid release/tag `v0.4.17-nuviodv.2`: source `11a3a98`, actual upstream base `0.4.16`, APK SHA-256 `9FA5031A5ABB56B6D91C9DF0B5FBFDDB8532DE294683D94BA9CD35FC5CCF4715`, four downloads.
+- Deleted invalid release/tag `v0.4.20-nuviodv.1`: tag source `ddecc19`, actual upstream base `0.4.17`, APK SHA-256 `F30C8D29E4EC2AF851B354BFE633F05374A47D25FB0D32ED96CEC3EA798810EF`, one download.
+- Deleted invalid release/tag `v0.4.21-nuviodv.1`: source `7066fe3`, actual upstream base `0.4.17`, APK SHA-256 `7DC5E4D584CDC45DD18603084ECAB7F043BB7AD09321C2C7009903EBE409240D`, four downloads.
+- Retained `v0.4.17-nuviodv.5`, `v0.4.18-nuviodv.1`, `v0.4.18-nuviodv.2`, and `v0.4.19-nuviodv.1` because each tag resolves to a source whose upstream base matches its left-side version. All four are normal releases; `v0.4.19-nuviodv.1` is explicitly Latest. No retained artifact required rebuilding.
