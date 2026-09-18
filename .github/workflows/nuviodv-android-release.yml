@@ -176,6 +176,7 @@ jobs:
           - Player: patched libmpv with libdovi and the independent libplacebo pink-screen correction
           - Playback details: optional live resolution, codec, dynamic range, and frame-rate row
           - Collections: native authenticated Trakt recommendations, watchlists, Up Next, Recently Aired, and calendar sources with website-compatible exports
+          - Layout: rebuild Home Layout collection rows from the current Collections order and remove stale collection entries
           - Artwork: optional RatingPosterDB portraits with branded integration icon, custom API-key support, and the public Tier 0 fallback
           - Authentication: Nuvio account, Trakt, and Simkl runtime configuration restored
 

@@ -13,6 +13,7 @@ Add a one-click action to General > Layout > Collections that rebuilds Home Layo
 - Remove stale `collection_*` Home Layout preferences whose collection no longer exists.
 - Preserve addon catalog rows, collection contents, collection artwork, row enabled state, and custom titles.
 - Persist and sync the repaired Home Layout payload without writing to collection sync storage.
+- Publish the verified change as the next normal signed ARM64 NuvioDV release without claiming the newer unsynchronized upstream `0.4.24` base.
 
 ## Acceptance Criteria
 
@@ -20,7 +21,9 @@ Add a one-click action to General > Layout > Collections that rebuilds Home Layo
 2. The same test proves unrelated addon-row state remains unchanged.
 3. General > Layout > Collections renders the rebuild action beside Copy and Import.
 4. Android compilation succeeds.
-5. The verified implementation is committed to `cmp-rewrite`; publishing a release is out of scope.
+5. The verified implementation is committed and pushed to `cmp-rewrite`.
+6. Normal release `v0.4.23-nuviodv.7` is published from the exact verified commit with Android version code `12220`.
+7. The published APK independently verifies package `com.darkaxt.nuviodv`, app label `NuvioDV`, ARM64-only native payload, established signing identity, and patched libdovi symbols.
 
 ## Stages
 
@@ -28,7 +31,8 @@ Add a one-click action to General > Layout > Collections that rebuilds Home Layo
 | --- | --- | --- |
 | Repository behavior | COMPLETE | 1, 2 |
 | Collections toolbar | COMPLETE | 3 |
-| Integrated verification and commit | COMPLETE | 4, 5 |
+| Integrated verification and commit | COMPLETE | 4 |
+| Signed release delivery | ACTIVE | 5, 6, 7 |
 
 ## Verification
 
