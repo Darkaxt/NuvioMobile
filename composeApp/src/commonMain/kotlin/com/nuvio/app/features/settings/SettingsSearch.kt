@@ -114,6 +114,7 @@ internal fun settingsSearchEntries(
     val pluginsPage = stringResource(Res.string.compose_settings_page_plugins)
     val collectionsPage = stringResource(Res.string.collections_header)
     val tmdbPage = stringResource(Res.string.compose_settings_page_tmdb_enrichment)
+    val rpdbPage = stringResource(Res.string.compose_settings_page_rpdb)
     val mdbListPage = stringResource(Res.string.compose_settings_page_mdblist_ratings)
 
     val entries = mutableListOf<SettingsSearchEntry>()
@@ -835,6 +836,13 @@ internal fun settingsSearchEntries(
         icon = Icons.Rounded.Link,
     )
     addPage(
+        page = SettingsPage.Rpdb,
+        key = "rpdb",
+        title = rpdbPage,
+        description = stringResource(Res.string.settings_integrations_rpdb_description),
+        icon = Icons.Rounded.Style,
+    )
+    addPage(
         page = SettingsPage.MdbListRatings,
         key = "mdblist",
         title = mdbListPage,
@@ -866,6 +874,21 @@ internal fun settingsSearchEntries(
             pageLabel = tmdbPage,
             section = row.sectionOverride ?: tmdbModulesSection,
             icon = Icons.Rounded.Link,
+        )
+    }
+
+    listOf(
+        PlaybackSearchRow("rpdb-enable", stringResource(Res.string.settings_rpdb_enable), stringResource(Res.string.settings_rpdb_enable_description), stringResource(Res.string.settings_rpdb_section_title)),
+        PlaybackSearchRow("rpdb-api-key", stringResource(Res.string.settings_rpdb_api_key_title), stringResource(Res.string.settings_rpdb_api_key_description, "t0-free-rpdb"), stringResource(Res.string.settings_rpdb_section_api_key)),
+    ).forEach { row ->
+        addRow(
+            page = SettingsPage.Rpdb,
+            key = row.key,
+            title = row.title,
+            description = row.description,
+            pageLabel = rpdbPage,
+            section = row.sectionOverride ?: stringResource(Res.string.settings_rpdb_section_title),
+            icon = Icons.Rounded.Style,
         )
     }
 

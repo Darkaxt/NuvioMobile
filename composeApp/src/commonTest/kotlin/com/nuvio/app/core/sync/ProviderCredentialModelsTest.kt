@@ -3,6 +3,7 @@ package com.nuvio.app.core.sync
 import com.nuvio.app.features.debrid.DebridSettings
 import com.nuvio.app.features.mdblist.MdbListSettings
 import com.nuvio.app.features.player.PlayerSettingsUiState
+import com.nuvio.app.features.rpdb.RpdbSettings
 import com.nuvio.app.features.tmdb.TmdbSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -25,6 +26,27 @@ class ProviderCredentialModelsTest {
         val credential = snapshot.values.single { it.provider == ProviderCredentialIds.TMDB }
 
         assertEquals(buildJsonObject { put("api_key", "") }, credential.credentialJson())
+    }
+
+    @Test
+    fun `RPDB credential snapshot contains only the custom override`() {
+        val custom = credentialSnapshot(
+            tmdb = TmdbSettings(),
+            rpdb = RpdbSettings(apiKey = " personal-rpdb-key "),
+        )
+        val fallback = credentialSnapshot(
+            tmdb = TmdbSettings(),
+            rpdb = RpdbSettings(),
+        )
+
+        assertEquals(
+            buildJsonObject { put("api_key", "personal-rpdb-key") },
+            custom.values.single { it.provider == ProviderCredentialIds.RPDB }.credentialJson(),
+        )
+        assertEquals(
+            buildJsonObject { put("api_key", "") },
+            fallback.values.single { it.provider == ProviderCredentialIds.RPDB }.credentialJson(),
+        )
     }
 
     @Test
@@ -127,11 +149,15 @@ class ProviderCredentialModelsTest {
         assertEquals("", local.mergeRemote(remote).values.single().value)
     }
 
-    private fun credentialSnapshot(tmdb: TmdbSettings) = ProviderCredentialSync.buildSnapshot(
+    private fun credentialSnapshot(
+        tmdb: TmdbSettings,
+        rpdb: RpdbSettings = RpdbSettings(),
+    ) = ProviderCredentialSync.buildSnapshot(
         profileId = 1,
         debrid = DebridSettings(),
         tmdb = tmdb,
         mdbList = MdbListSettings(),
+        rpdb = rpdb,
         player = PlayerSettingsUiState(),
     )
 }

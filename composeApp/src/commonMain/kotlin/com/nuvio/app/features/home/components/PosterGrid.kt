@@ -15,6 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +37,7 @@ import com.nuvio.app.core.ui.posterCardClickable
 import com.nuvio.app.core.ui.rememberPosterCardStyleUiState
 import com.nuvio.app.features.home.MetaPreview
 import com.nuvio.app.features.home.PosterShape
+import com.nuvio.app.features.rpdb.rpdbPosterSelection
 import com.nuvio.app.features.watching.application.WatchingState
 
 internal fun posterGridColumnCountForWidth(screenWidth: Dp): Int =
@@ -114,6 +119,10 @@ private fun PosterGridTile(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val rpdbPoster = item.rpdbPosterSelection()
+    var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
+    val posterUrl = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -131,16 +140,21 @@ private fun PosterGridTile(
                 .posterCardClickable(
                     onClick = onClick,
                     onLongClick = onLongClick,
-                    zoomImageUrl = item.poster,
+                    zoomImageUrl = posterUrl,
                     zoomCornerRadius = cornerRadiusDp.dp,
                 ),
         ) {
-            if (item.poster != null) {
+            if (posterUrl != null) {
                 AsyncImage(
-                    model = item.poster,
+                    model = posterUrl,
                     contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
+                    onError = {
+                        if (!useFallbackPoster && !rpdbPoster.fallbackUrl.isNullOrBlank()) {
+                            useFallbackPoster = true
+                        }
+                    },
                 )
             }
             NuvioPosterWatchedOverlay(isWatched = isWatched)

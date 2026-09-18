@@ -63,6 +63,7 @@ import com.nuvio.app.features.home.HomeCatalogSettingsRepository
 import com.nuvio.app.features.home.PosterShape
 import com.nuvio.app.features.home.components.HomeEmptyStateCard
 import com.nuvio.app.features.home.stableKey
+import com.nuvio.app.features.rpdb.rpdbPosterSelection
 import com.nuvio.app.features.watched.WatchedRepository
 import com.nuvio.app.features.watching.application.WatchingState
 import com.nuvio.app.navigation.LocalUseNativeNavigation
@@ -303,6 +304,10 @@ private fun CatalogPosterTile(
     onClick: (() -> Unit)? = null,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val rpdbPoster = item.rpdbPosterSelection()
+    var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
+    val posterUrl = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
+
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -319,16 +324,21 @@ private fun CatalogPosterTile(
                 .posterCardClickable(
                     onClick = onClick,
                     onLongClick = onLongClick,
-                    zoomImageUrl = item.poster,
+                    zoomImageUrl = posterUrl,
                     zoomCornerRadius = cornerRadiusDp.dp,
                 ),
         ) {
-            if (item.poster != null) {
+            if (posterUrl != null) {
                 AsyncImage(
-                    model = item.poster,
+                    model = posterUrl,
                     contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
+                    onError = {
+                        if (!useFallbackPoster && !rpdbPoster.fallbackUrl.isNullOrBlank()) {
+                            useFallbackPoster = true
+                        }
+                    },
                 )
             }
             NuvioPosterWatchedOverlay(isWatched = isWatched)

@@ -17,6 +17,8 @@ import com.nuvio.app.features.notifications.EpisodeReleaseNotificationsRepositor
 import com.nuvio.app.features.player.PlayerSettingsStorage
 import com.nuvio.app.features.player.PlayerSettingsRepository
 import com.nuvio.app.features.profiles.ProfileRepository
+import com.nuvio.app.features.rpdb.RpdbSettingsRepository
+import com.nuvio.app.features.rpdb.RpdbSettingsStorage
 import com.nuvio.app.core.ui.CardDepthStyleRepository
 import com.nuvio.app.core.ui.CardDepthStyleStorage
 import com.nuvio.app.core.ui.PosterCardStyleRepository
@@ -191,6 +193,7 @@ object ProfileSettingsSync {
             DebridSettingsRepository.uiState.map { "debrid" },
             TmdbSettingsRepository.uiState.map { "tmdb" },
             MdbListSettingsRepository.uiState.map { "mdblist" },
+            RpdbSettingsRepository.uiState.map { "rpdb" },
             MetaScreenSettingsRepository.uiState.map { "meta" },
             CollectionMobileSettingsRepository.uiState.map { "collection_mobile_settings" },
             ContinueWatchingPreferencesRepository.uiState.map { "continue_watching" },
@@ -252,6 +255,10 @@ object ProfileSettingsSync {
                 mdbListSettings = withoutProfileCredentials(
                     PROFILE_MDBLIST_SETTINGS_FEATURE,
                     MdbListSettingsStorage.exportToSyncPayload(),
+                ),
+                rpdbSettings = withoutProfileCredentials(
+                    PROFILE_RPDB_SETTINGS_FEATURE,
+                    RpdbSettingsStorage.exportToSyncPayload(),
                 ),
                 metaScreenSettingsPayload = MetaScreenSettingsStorage.loadPayload().orEmpty().trim(),
                 collectionMobileSettingsPayload = CollectionMobileSettingsStorage.loadPayload().orEmpty().trim(),
@@ -318,6 +325,15 @@ object ProfileSettingsSync {
         MdbListMetadataService.clearCache()
         MdbListSettingsRepository.onProfileChanged()
 
+        RpdbSettingsStorage.replaceFromSyncPayload(
+            preservingLocalProfileCredentials(
+                PROFILE_RPDB_SETTINGS_FEATURE,
+                blob.features.rpdbSettings,
+                RpdbSettingsStorage.exportToSyncPayload(),
+            ),
+        )
+        RpdbSettingsRepository.onProfileChanged()
+
         MetaScreenSettingsStorage.savePayload(blob.features.metaScreenSettingsPayload)
         MetaScreenSettingsRepository.onProfileChanged()
 
@@ -345,6 +361,7 @@ object ProfileSettingsSync {
         DebridSettingsRepository.ensureLoaded()
         TmdbSettingsRepository.ensureLoaded()
         MdbListSettingsRepository.ensureLoaded()
+        RpdbSettingsRepository.ensureLoaded()
         MetaScreenSettingsRepository.ensureLoaded()
         CollectionMobileSettingsRepository.ensureLoaded()
         ContinueWatchingPreferencesRepository.ensureLoaded()
@@ -376,6 +393,7 @@ private data class MobileProfileSettingsFeatures(
     @SerialName("debrid_settings") val debridSettings: JsonObject = JsonObject(emptyMap()),
     @SerialName("tmdb_settings") val tmdbSettings: JsonObject = JsonObject(emptyMap()),
     @SerialName("mdblist_settings") val mdbListSettings: JsonObject = JsonObject(emptyMap()),
+    @SerialName("rpdb_settings") val rpdbSettings: JsonObject = JsonObject(emptyMap()),
     @SerialName("meta_screen_settings_payload") val metaScreenSettingsPayload: String = "",
     @SerialName("collection_mobile_settings_payload") val collectionMobileSettingsPayload: String = "",
     @SerialName("continue_watching_settings_payload") val continueWatchingSettingsPayload: String = "",

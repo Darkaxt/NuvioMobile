@@ -56,4 +56,17 @@ class ProfileSettingsCredentialPolicyTest {
         assertFalse("tmdb_api_key" in sanitized)
         assertEquals(JsonPrimitive(true), merged["tmdb_enabled"])
     }
+
+    @Test
+    fun `legacy RPDB credentials cannot enter the settings blob`() {
+        val payload = buildJsonObject {
+            put("rpdb_enabled", JsonPrimitive(true))
+            put("rpdb_api_key", JsonPrimitive("secret"))
+        }
+
+        val sanitized = withoutProfileCredentials(PROFILE_RPDB_SETTINGS_FEATURE, payload)
+
+        assertFalse("rpdb_api_key" in sanitized)
+        assertEquals(JsonPrimitive(true), sanitized["rpdb_enabled"])
+    }
 }
