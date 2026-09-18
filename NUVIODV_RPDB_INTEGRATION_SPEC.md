@@ -18,6 +18,7 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-8`: Changing RPDB settings must take effect when returning to portrait-bearing screens without requiring an application restart.
 - `RPDB-9`: Cover the resolver, settings policy, and credential handling with focused tests.
 - `RPDB-10`: Publish the verified integration as a signed NuvioDV Android release with a version newer than the installed test build.
+- `RPDB-11`: Display the branded RPDB icon in the General > Integrations row on phone and tablet layouts.
 
 ## Acceptance Criteria
 
@@ -31,12 +32,13 @@ The user requested RPDB support under General > Integrations and specified that 
 8. The API key is excluded from the normal settings blob and included in provider credential sync.
 9. Focused common tests and the applicable Android compile/test tasks pass.
 10. The signed GitHub release identifies RPDB support and its APK reports the new NuvioDV version and version code.
+11. The RPDB integration row renders a bundled branded RPDB icon instead of the generic image glyph.
 
 ## Staged Plan And Reconciliation Ledger
 
 ### Stage 1: Core settings and resolver
 
-Status: `COMPLETE`
+Status: `ACTIVE`
 
 Requirements: `RPDB-2`, `RPDB-3`, `RPDB-4`, `RPDB-5`, `RPDB-9`
 
@@ -96,7 +98,7 @@ Tracked deferrals: none.
 
 Verification:
 
-- All ten requirements and all ten acceptance criteria are satisfied.
+- Requirements `RPDB-1` through `RPDB-10` remain satisfied; `RPDB-11` is pending Stage 5 verification and release.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
@@ -126,3 +128,15 @@ Repository baseline note:
 
 - The full `:composeApp:testAndroidHostTest` run reaches 1082 tests but has six failures in `AndroidDownloadLifecycleTest` and `DownloadSubtitlesTest`.
 - The same six assertions fail when those classes are run against untouched commit `64858b48` in a separate worktree, so they are verified pre-existing failures unrelated to this change.
+
+### Stage 5: Branded integration icon release
+
+Status: `ACTIVE`
+
+Requirements: `RPDB-11`
+
+Acceptance evidence required:
+
+- The RPDB integration row uses the shared cross-platform branded painter path on phone and tablet layouts.
+- Android compilation packages the RPDB logo resource successfully.
+- Signed release `v0.4.23-nuviodv.6` publishes package `com.darkaxt.nuviodv` with version code `12219`.

@@ -1,8 +1,6 @@
 package com.nuvio.app.features.settings
 
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Image
 import nuvio.composeapp.generated.resources.compose_settings_page_debrid
 import nuvio.composeapp.generated.resources.Res
 import nuvio.composeapp.generated.resources.compose_settings_page_mdblist_ratings
@@ -39,7 +37,7 @@ internal fun LazyListScope.integrationsContent(
                 SettingsNavigationRow(
                     title = stringResource(Res.string.compose_settings_page_rpdb),
                     description = stringResource(Res.string.settings_integrations_rpdb_description),
-                    icon = Icons.Rounded.Image,
+                    iconPainter = integrationLogoPainter(IntegrationLogo.Rpdb),
                     isTablet = isTablet,
                     onClick = onRpdbClick,
                 )
