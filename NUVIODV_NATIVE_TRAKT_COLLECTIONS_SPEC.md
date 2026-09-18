@@ -61,9 +61,9 @@ The serialized field is `traktSourceType`. Missing `traktSourceType` plus a non-
 | Collection migration | COMPLETE | T8 | TC5 passed for `nuvio-collections-kaptain-mega-hybrid-2026-09-18-nuviodv-trakt.reconciled.json`; seven native sources, zero AIOMetadata Trakt refs, unrelated semantic JSON preserved, decade order and Anime placement verified |
 | Documentation and release | COMPLETE | T9-T11 | TC4 and TC6-TC9 passed; full debug build succeeded, README/version updated, source `83f45109c6ab570744a465cf69333c66b3817be9` pushed, and normal release `v0.4.23-nuviodv.2` independently verified |
 | Final reconciliation | COMPLETE | T1-T11 | TC10 passed for the initial native Trakt implementation, with zero blockers and zero tracked deferrals at that boundary |
-| Website import compatibility | ACTIVE | T12, T13 | TC11, TC12; repaired artifact passes the website rule, app export/preservation tests pass, patch release pending |
+| Website import compatibility | COMPLETE | T12, T13 | TC11 and TC12 passed; repaired artifact and app exports satisfy the website validator without changing native account semantics, and patch release `v0.4.23-nuviodv.3` was independently verified |
 
-Blockers: the `v0.4.23-nuviodv.2` import artifact is rejected by the current website because explicit account sources omit its required numeric `traktListId` compatibility field.
+Blockers: none.
 
 Tracked deferrals: none.
 
@@ -81,4 +81,12 @@ Tracked deferrals: none.
 - Signing certificate SHA-256: `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, matching the previous normal release.
 - Independent APK inspection confirmed ARM64-only native payload, one `lib/arm64-v8a/libmpv.so`, and the `dovi_parse_rpu` symbol.
 - Final collection validation confirmed 22 collections, exactly seven native Trakt sources in `Discover > For You`, zero legacy AIOMetadata Trakt references, newest-to-oldest `By Decade`, `Anime` immediately after `Genres`, and zero movie-after-series ordering violations.
+- The current website validator accepts the repaired collection with zero errors. All seven native account sources export `traktListId: 0`; explicit `traktSourceType` remains authoritative, and preservation tests confirm those account sources do not collide.
+- Repaired collection SHA-256: `86733F07FCEEB1F0EF58AFD87F278C5CC6732E2F590802412C3FF05CEB4E6409`.
+- Compatibility source: `26afcf7faf4359d4d567b4e098ddf0cb32ecbf08`.
+- Compatibility release workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/35352495861`.
+- Compatibility release: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.23-nuviodv.3`.
+- Published compatibility APK: `NuvioDV-0.4.23-nuviodv.3-arm64-v8a.apk`.
+- Compatibility APK SHA-256: `F1C24FF06C2F4BF204C7D60473060AB94EB8CB38DE163030A36CB969E9805465`.
+- Independent compatibility APK inspection confirmed package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.23-nuviodv.3`, version code `12216`, ARM64-only native payload, signing certificate SHA-256 `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, one `lib/arm64-v8a/libmpv.so`, and the `dovi_parse_rpu` symbol.
 - The repository-wide Android host test task has six unrelated download-test failures. Running the exact failing test classes at pre-feature commit `cac0a6c7` reproduces the same six failures, while the Trakt commit changes no download implementation or test files; these are verified baseline failures rather than regressions from this work.

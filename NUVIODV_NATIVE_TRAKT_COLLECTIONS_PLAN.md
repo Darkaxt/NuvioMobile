@@ -56,7 +56,7 @@ Status: `COMPLETE`
 
 ## Stage 7: Website Import Compatibility
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 - Reproduce the current website validator contract for Trakt sources.
 - Emit numeric compatibility list IDs for explicit account sources without changing their semantics.
