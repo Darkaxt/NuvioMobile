@@ -344,6 +344,8 @@
     <string name="collections_new">New Collection</string>
     <string name="collections_pinned">Pinned</string>
     <string name="collections_rebuild_layout">Rebuild Home Layout</string>
+    <string name="collections_rebuild_success_message">The Home Layout collection rows now match your current Collections order.</string>
+    <string name="collections_rebuild_success_title">Home Layout Refreshed</string>
     <string name="collections_tab_all">All</string>
     <string name="collections_your_collections">Your Collections</string>
     <string name="compose_about_made_with">Made with ❤️ by Tapframe and friends</string>

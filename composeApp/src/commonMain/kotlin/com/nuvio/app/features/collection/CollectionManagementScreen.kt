@@ -77,6 +77,7 @@ fun CollectionManagementScreen(
     var importError by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirm by remember { mutableStateOf<String?>(null) }
     var showCopyError by remember { mutableStateOf(false) }
+    var showRebuildSuccess by remember { mutableStateOf(false) }
 
     NuvioScreen {
         stickyHeader {
@@ -105,6 +106,7 @@ fun CollectionManagementScreen(
                 }
                 IconButton(onClick = {
                     HomeCatalogSettingsRepository.rebuildCollectionLayout(collections)
+                    showRebuildSuccess = true
                 }) {
                     Icon(
                         imageVector = Icons.Rounded.Refresh,
@@ -210,6 +212,14 @@ fun CollectionManagementScreen(
         isVisible = showCopyError,
         onConfirm = { showCopyError = false },
         onDismiss = { showCopyError = false },
+    )
+
+    NuvioStatusModal(
+        title = stringResource(Res.string.collections_rebuild_success_title),
+        message = stringResource(Res.string.collections_rebuild_success_message),
+        isVisible = showRebuildSuccess,
+        onConfirm = { showRebuildSuccess = false },
+        onDismiss = { showRebuildSuccess = false },
     )
 
     val deleteId = showDeleteConfirm
