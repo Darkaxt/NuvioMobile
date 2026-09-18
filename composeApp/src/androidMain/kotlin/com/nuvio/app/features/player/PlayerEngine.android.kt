@@ -1283,6 +1283,9 @@ private class NuvioLibmpvView(
     private var latestSubtitleTracks: List<LibmpvTrack> = emptyList()
 
     override fun initOptions() {
+        applyLibmpvProcessSafetyOptions { name, value ->
+            mpv.setOptionString(name, value)
+        }
         setVo(videoOutput.mpvValue)
         mpv.setOptionString("profile", "fast")
         mpv.setOptionString("hwdec", if (hardwareDecodingEnabled) "auto" else "no")
@@ -1709,6 +1712,10 @@ private data class LibmpvTrack(
 
 private fun libmpvCacheBytes(): Int =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) 64 * 1024 * 1024 else 32 * 1024 * 1024
+
+internal fun applyLibmpvProcessSafetyOptions(setOption: (String, String) -> Int) {
+    setOption("ytdl", "no").logIfMpvError("ytdl")
+}
 
 private fun Int.logIfMpvError(option: String) {
     if (this < 0) Log.w(TAG, "libmpv option failed: $option status=$this")
