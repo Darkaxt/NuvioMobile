@@ -32,10 +32,14 @@ Add a one-click action to General > Layout > Collections that rebuilds Home Layo
 | Repository behavior | COMPLETE | 1, 2 |
 | Collections toolbar | COMPLETE | 3 |
 | Integrated verification and commit | COMPLETE | 4 |
-| Signed release delivery | ACTIVE | 5, 6, 7 |
+| Signed release delivery | COMPLETE | 5, 6, 7 |
 
 ## Verification
 
 - `HomeCatalogSettingsRepositoryTest` passes, including stale-row removal, collection-order rebuilding, and preservation of addon-row state.
 - `:androidApp:assembleFullDebug` succeeds with the new toolbar action and string resource.
 - `git diff --check` reports no whitespace errors.
+- Source commit `67c366b3d78978f0396d61718bb4a6ff65f5386c` is pushed to `origin/cmp-rewrite`.
+- GitHub Actions run `35394706431` built, verified, and published normal release `v0.4.23-nuviodv.7` from that exact source commit.
+- Independently downloaded APK SHA-256 is `103ed312c211791a662301fbf474911343ee640438d43b8edcc8de1e6424c670`, matching the GitHub release digest.
+- Independent APK inspection verifies package `com.darkaxt.nuviodv`, version name `0.4.23-nuviodv.7`, version code `12220`, app label `NuvioDV`, only `arm64-v8a` native libraries, one `libmpv.so`, signer SHA-256 `1fb94424753a90f993c678b6fa4322579253bb303f22c335db395a9e2557d571`, and exported `dovi_parse_rpu`, `pl_shader_dovi_reshape`, and `pl_hdr_metadata_from_dovi_rpu` symbols.
