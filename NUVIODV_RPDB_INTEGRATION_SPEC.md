@@ -88,7 +88,7 @@ Evidence:
 
 ### Final Reconciliation
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Blockers: none.
 
@@ -96,14 +96,18 @@ Tracked deferrals: none.
 
 Verification:
 
-- All nine requirements and all nine acceptance criteria are satisfied.
+- All ten requirements and all ten acceptance criteria are satisfied.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
+- GitHub Actions run `35361888866` built, verified, and published the signed ARM64 release successfully.
+- Release `v0.4.23-nuviodv.5` targets source commit `77e722f5412ab0138559c5d9f394a65ea7b7910e`.
+- The published APK independently reports package `com.darkaxt.nuviodv`, version `0.4.23-nuviodv.5`, version code `12218`, and ABI `arm64-v8a`.
+- The published APK SHA-256 is `40bf5a731b571fb5181176989d5c7d1d439f9273f871b7d37dc2ed45083a5e17`, matching GitHub's release digest, and its DEX/resources contain the RPDB implementation.
 
 ### Stage 4: Release delivery
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `RPDB-10`
 
@@ -112,6 +116,11 @@ Acceptance evidence required:
 - The verified source is committed and pushed to `cmp-rewrite`.
 - The signed release workflow succeeds for the exact source commit.
 - The published ARM64 APK reports version `0.4.23-nuviodv.5`, version code `12218`, package `com.darkaxt.nuviodv`, and contains the RPDB settings resources.
+
+Release evidence:
+
+- Workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/35361888866`
+- Release: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.23-nuviodv.5`
 
 Repository baseline note:
 
