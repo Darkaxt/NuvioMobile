@@ -40,7 +40,7 @@ Status: `COMPLETE`
 
 ## Stage 5: Documentation And Release
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 - Update README and version metadata.
 - Run focused tests and the integrated Android debug build.
@@ -49,7 +49,7 @@ Status: `ACTIVE`
 
 ## Stage 6: Final Reconciliation
 
-Status: `NOT STARTED`
+Status: `COMPLETE`
 
 - Reconcile every T requirement and TC acceptance criterion.
 - Record final evidence, blockers, and deferrals in the specification.

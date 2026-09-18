@@ -55,9 +55,25 @@ The serialized field is `traktSourceType`. Missing `traktSourceType` plus a non-
 | Account catalogue resolution | COMPLETE | T3-T5 | TC2 passed in `TraktAccountCatalogClientTest`; all seven routes, pagination, mapping, calendar grouping, dropped-show filtering, partial-failure behavior, and profile OAuth boundary verified |
 | Editor integration | COMPLETE | T6, T7 | TC3 passed in `CollectionEditorTraktSourceTest`; account/public-list mode selection, dual-media creation, series-only constraints, calendar bounds, and legacy public-list edit state verified |
 | Collection migration | COMPLETE | T8 | TC5 passed for `nuvio-collections-kaptain-mega-hybrid-2026-09-18-nuviodv-trakt.reconciled.json`; seven native sources, zero AIOMetadata Trakt refs, unrelated semantic JSON preserved, decade order and Anime placement verified |
-| Documentation and release | ACTIVE | T9-T11 | TC4, TC6-TC9 |
-| Final reconciliation | NOT STARTED | T1-T11 | TC10 |
+| Documentation and release | COMPLETE | T9-T11 | TC4 and TC6-TC9 passed; full debug build succeeded, README/version updated, source `83f45109c6ab570744a465cf69333c66b3817be9` pushed, and normal release `v0.4.23-nuviodv.2` independently verified |
+| Final reconciliation | COMPLETE | T1-T11 | TC10 passed; every requirement and acceptance criterion is satisfied, with zero blockers and zero tracked deferrals |
 
 Blockers: none.
 
 Tracked deferrals: none.
+
+## Verification Evidence
+
+- Focused Android host tests passed for source serialization, public-list compatibility, account catalogue resolution, OAuth-header forwarding, and editor source construction.
+- `:androidApp:assembleFullDebug` completed successfully with package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.23-nuviodv.2`, and version code `12215`.
+- Reconciled collection: `C:\Users\darka\Documents\Projects\Stremio Add-on Tester\output\nuvio-collections-kaptain-mega-hybrid-2026-09-18-nuviodv-trakt.reconciled.json`.
+- Collection SHA-256: `08140C53D2842DAABD21D4DC5C219B73F0DD624FAB2D4CBE8EAB00D76DF1F3D8`.
+- Release workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/35344780813`.
+- Release: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.23-nuviodv.2`.
+- Release source: `83f45109c6ab570744a465cf69333c66b3817be9`.
+- Published APK: `NuvioDV-0.4.23-nuviodv.2-arm64-v8a.apk`.
+- APK SHA-256: `0B0E000E9FA9F2B6CE9C6D0E28AAA226425DCA75CF3466F7443B4711AD3BA7DD`.
+- Signing certificate SHA-256: `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, matching the previous normal release.
+- Independent APK inspection confirmed ARM64-only native payload, one `lib/arm64-v8a/libmpv.so`, and the `dovi_parse_rpu` symbol.
+- Final collection validation confirmed 22 collections, exactly seven native Trakt sources in `Discover > For You`, zero legacy AIOMetadata Trakt references, newest-to-oldest `By Decade`, `Anime` immediately after `Genres`, and zero movie-after-series ordering violations.
+- The repository-wide Android host test task has six unrelated download-test failures. Running the exact failing test classes at pre-feature commit `cac0a6c7` reproduces the same six failures, while the Trakt commit changes no download implementation or test files; these are verified baseline failures rather than regressions from this work.
