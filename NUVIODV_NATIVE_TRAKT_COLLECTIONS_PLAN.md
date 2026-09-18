@@ -66,7 +66,7 @@ Status: `COMPLETE`
 
 ## Stage 8: Deployed Website Compatibility
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 - Reproduce the validator from the JavaScript currently deployed at `nuvio.tv`.
 - Replace the zero compatibility value with a reserved positive sentinel for explicit account sources.

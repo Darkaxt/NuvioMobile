@@ -66,9 +66,9 @@ The serialized field is `traktSourceType`. Missing `traktSourceType` plus a non-
 | Documentation and release | COMPLETE | T9-T11 | TC4 and TC6-TC9 passed; full debug build succeeded, README/version updated, source `83f45109c6ab570744a465cf69333c66b3817be9` pushed, and normal release `v0.4.23-nuviodv.2` independently verified |
 | Final reconciliation | COMPLETE | T1-T11 | TC10 passed for the initial native Trakt implementation, with zero blockers and zero tracked deferrals at that boundary |
 | Source-snapshot website compatibility | COMPLETE | T12, T13 | TC11 and TC12 passed against the examined NuvioTV source snapshot, and patch release `v0.4.23-nuviodv.3` was independently verified |
-| Deployed website compatibility | ACTIVE | T14, T15 | TC13 and TC14; the deployed validator requires a positive sentinel rather than zero, implementation and release pending |
+| Deployed website compatibility | COMPLETE | T14, T15 | TC13 and TC14 passed; the live importer accepted the positive sentinel, the collection was deployed, and patch release `v0.4.23-nuviodv.4` was independently verified |
 
-Blockers: the deployed `nuvio.tv` validator rejects the `traktListId: 0` compatibility value used by `v0.4.23-nuviodv.3`.
+Blockers: none.
 
 Tracked deferrals: none.
 
@@ -94,4 +94,13 @@ Tracked deferrals: none.
 - Published compatibility APK: `NuvioDV-0.4.23-nuviodv.3-arm64-v8a.apk`.
 - Compatibility APK SHA-256: `F1C24FF06C2F4BF204C7D60473060AB94EB8CB38DE163030A36CB969E9805465`.
 - Independent compatibility APK inspection confirmed package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.23-nuviodv.3`, version code `12216`, ARM64-only native payload, signing certificate SHA-256 `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, one `lib/arm64-v8a/libmpv.so`, and the `dovi_parse_rpu` symbol.
+- The exact JavaScript validator deployed at `nuvio.tv` accepted the reconciled collection with zero errors. All seven account sources export reserved positive compatibility sentinel `2147483647`, while `traktSourceType` remains authoritative through website normalization and NuvioDV routing.
+- Live import at `https://nuvio.tv/account?tab=collections` completed on September 18, 2026. The refreshed account page reports 22 collections, 780 folders, and 3594 sources with no missing-Trakt-list-ID error; it also shows `Anime` directly after `Genres` and `By Decade` newest-to-oldest.
+- Deployed collection SHA-256: `A8F4E295F7B5D0F1ADB8B2A97849C56C7D804A7AF8AF7CAD85DC88EA00C1780C`.
+- Live-site compatibility source: `1e6dce59184d00a8ec77e1cb40e8e18a336dd607`.
+- Live-site compatibility release workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/35355208664`.
+- Live-site compatibility release: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.23-nuviodv.4`.
+- Published live-site compatibility APK: `NuvioDV-0.4.23-nuviodv.4-arm64-v8a.apk`.
+- Live-site compatibility APK SHA-256: `EDD154626BF477AE25C4DD59D8C15194C73B7BB158D084DF14539CDC97191C6F`.
+- Independent live-site compatibility APK inspection confirmed package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.23-nuviodv.4`, version code `12217`, ARM64-only native payload, signing certificate SHA-256 `1FB94424753A90F993C678B6FA4322579253BB303F22C335DB395A9E2557D571`, one `lib/arm64-v8a/libmpv.so`, and the `dovi_parse_rpu` symbol.
 - The repository-wide Android host test task has six unrelated download-test failures. Running the exact failing test classes at pre-feature commit `cac0a6c7` reproduces the same six failures, while the Trakt commit changes no download implementation or test files; these are verified baseline failures rather than regressions from this work.
