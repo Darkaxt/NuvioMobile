@@ -159,7 +159,7 @@ class CollectionSourceSerializationTest {
             .jsonArray.single()
             .jsonObject
 
-        assertEquals(0L, sourceObject["traktListId"]!!.jsonPrimitive.long)
+        assertEquals(2_147_483_647L, sourceObject["traktListId"]!!.jsonPrimitive.long)
         assertEquals(
             TraktCollectionSourceType.RECOMMENDATIONS.value,
             sourceObject["traktSourceType"]!!.jsonPrimitive.content,
@@ -479,7 +479,11 @@ class CollectionSourceSerializationTest {
             listOf("recommendations-marker", "watchlist-marker", "calendar-marker"),
             mergedSources.map { it.jsonObject["customField"]!!.jsonPrimitive.content },
         )
-        assertTrue(mergedSources.all { it.jsonObject["traktListId"]!!.jsonPrimitive.long == 0L })
+        assertTrue(
+            mergedSources.all {
+                it.jsonObject["traktListId"]!!.jsonPrimitive.long == 2_147_483_647L
+            },
+        )
     }
 
     @Test

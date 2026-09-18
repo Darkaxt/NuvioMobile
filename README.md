@@ -76,8 +76,8 @@ rows to these native sources is available locally at:
 
 Connect Trakt in Nuvio settings before opening those rows. Existing imported
 public-list sources remain compatible and keep their list sorting controls.
-Exports include the numeric compatibility field required by the current Nuvio
-configuration website while retaining explicit native account-source semantics.
+Exports include the positive list-ID compatibility sentinel required by the
+deployed `nuvio.tv` validator while retaining explicit native account-source semantics.
 
 ## Upstream project
 

@@ -11,7 +11,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 internal object CollectionJsonPreserver {
-    private const val TRAKT_ACCOUNT_WEBSITE_COMPATIBILITY_LIST_ID = 0L
+    private const val TRAKT_ACCOUNT_WEBSITE_COMPATIBILITY_LIST_ID = 2_147_483_647L
 
     fun merge(
         json: Json,

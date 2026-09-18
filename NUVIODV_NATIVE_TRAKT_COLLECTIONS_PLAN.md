@@ -54,7 +54,7 @@ Status: `COMPLETE`
 - Reconcile every T requirement and TC acceptance criterion.
 - Record final evidence, blockers, and deferrals in the specification.
 
-## Stage 7: Website Import Compatibility
+## Stage 7: Source-Snapshot Website Compatibility
 
 Status: `COMPLETE`
 
@@ -63,3 +63,13 @@ Status: `COMPLETE`
 - Fix account-source raw JSON preservation keys so distinct account catalogue types cannot collide.
 - Regenerate and validate the reconciled import artifact.
 - Publish and independently verify patch release `v0.4.23-nuviodv.3`, then reconcile T12-T13 and TC11-TC12.
+
+## Stage 8: Deployed Website Compatibility
+
+Status: `ACTIVE`
+
+- Reproduce the validator from the JavaScript currently deployed at `nuvio.tv`.
+- Replace the zero compatibility value with a reserved positive sentinel for explicit account sources.
+- Verify that website normalization preserves `traktSourceType` and that NuvioDV routing ignores the sentinel.
+- Regenerate and validate the reconciled import artifact against the deployed predicate.
+- Publish and independently verify patch release `v0.4.23-nuviodv.4`, then reconcile T14-T15 and TC13-TC14.
