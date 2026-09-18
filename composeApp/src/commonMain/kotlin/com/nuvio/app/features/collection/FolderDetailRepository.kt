@@ -15,7 +15,7 @@ import com.nuvio.app.features.home.HomeCatalogSection
 import com.nuvio.app.features.home.MetaPreview
 import com.nuvio.app.features.home.filterReleasedItems
 import com.nuvio.app.features.home.stableKey
-import com.nuvio.app.features.trakt.TraktPublicListSourceResolver
+import com.nuvio.app.features.trakt.TraktCollectionSourceResolver
 import com.nuvio.app.features.watchprogress.CurrentDateProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -326,7 +326,7 @@ object FolderDetailRepository {
                         page = if (reset) 1 else requestedSkip,
                     )
 
-                    source?.isTrakt == true -> TraktPublicListSourceResolver.resolve(
+                    source?.isTrakt == true -> TraktCollectionSourceResolver.resolve(
                         source = source,
                         page = if (reset) 1 else requestedSkip,
                     )
@@ -482,11 +482,4 @@ private fun tmdbCatalogId(source: CollectionSource): String =
     }
 
 private fun traktCatalogId(source: CollectionSource): String =
-    listOf(
-        "trakt",
-        "list",
-        source.traktListId?.toString().orEmpty(),
-        source.mediaType?.lowercase().orEmpty(),
-        TraktListSort.normalize(source.sortBy),
-        TraktSortHow.normalize(source.sortHow),
-    ).joinToString("_")
+    source.catalogRouteKey()

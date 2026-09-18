@@ -55,6 +55,114 @@ class CollectionSourceSerializationTest {
         assertEquals(TmdbCollectionMediaType.MOVIE.name, source.mediaType)
         assertEquals(TraktListSort.ADDED.value, source.sortBy)
         assertEquals(TraktSortHow.DESC.value, source.sortHow)
+        assertEquals(TraktCollectionSourceType.PUBLIC_LIST, source.resolvedTraktSourceType)
+    }
+
+    @Test
+    fun authenticatedTraktSourceTypesRoundTripWithoutListIds() {
+        val sources = listOf(
+            CollectionSource(
+                provider = "trakt",
+                title = "Recommended Movies",
+                traktSourceType = TraktCollectionSourceType.RECOMMENDATIONS.value,
+                mediaType = TmdbCollectionMediaType.MOVIE.value,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Movie Watchlist",
+                traktSourceType = TraktCollectionSourceType.WATCHLIST.value,
+                mediaType = TmdbCollectionMediaType.MOVIE.value,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Recommended Shows",
+                traktSourceType = TraktCollectionSourceType.RECOMMENDATIONS.value,
+                mediaType = TmdbCollectionMediaType.TV.value,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Up Next",
+                traktSourceType = TraktCollectionSourceType.UP_NEXT.value,
+                mediaType = TmdbCollectionMediaType.TV.value,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Recently Aired",
+                traktSourceType = TraktCollectionSourceType.UNWATCHED.value,
+                mediaType = TmdbCollectionMediaType.TV.value,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Calendar",
+                traktSourceType = TraktCollectionSourceType.CALENDAR.value,
+                mediaType = TmdbCollectionMediaType.TV.value,
+                calendarDays = 1,
+            ),
+            CollectionSource(
+                provider = "trakt",
+                title = "Show Watchlist",
+                traktSourceType = TraktCollectionSourceType.WATCHLIST.value,
+                mediaType = TmdbCollectionMediaType.TV.value,
+            ),
+        )
+        val collection = Collection(
+            id = "collection-1",
+            title = "For You",
+            folders = listOf(CollectionFolder(id = "folder-1", title = "Trakt", sources = sources)),
+        )
+
+        val decoded = json.decodeFromString<List<Collection>>(json.encodeToString(listOf(collection)))
+            .single()
+            .folders
+            .single()
+            .resolvedSources
+
+        assertEquals(sources, decoded)
+        assertTrue(decoded.none(CollectionSource::hasInvalidTraktListId))
+        assertEquals(
+            sources.map { it.traktSourceType },
+            decoded.map { it.resolvedTraktSourceType.value },
+        )
+    }
+
+    @Test
+    fun legacyTraktPublicListInfersTypeAndStillRequiresListId() {
+        val validLegacy = CollectionSource(
+            provider = "trakt",
+            traktListId = 42L,
+            mediaType = "MOVIE",
+        )
+        val invalidExplicit = CollectionSource(
+            provider = "trakt",
+            traktSourceType = TraktCollectionSourceType.PUBLIC_LIST.value,
+            mediaType = "MOVIE",
+        )
+
+        assertEquals(TraktCollectionSourceType.PUBLIC_LIST, validLegacy.resolvedTraktSourceType)
+        assertFalse(validLegacy.hasInvalidTraktListId())
+        assertTrue(invalidExplicit.hasInvalidTraktListId())
+    }
+
+    @Test
+    fun traktRouteKeysDistinguishAccountSourceTypeAndMedia() {
+        fun source(type: TraktCollectionSourceType, mediaType: String) = CollectionSource(
+            provider = "trakt",
+            traktSourceType = type.value,
+            mediaType = mediaType,
+        )
+
+        val keys = listOf(
+            source(TraktCollectionSourceType.RECOMMENDATIONS, "movie"),
+            source(TraktCollectionSourceType.RECOMMENDATIONS, "series"),
+            source(TraktCollectionSourceType.WATCHLIST, "movie"),
+            source(TraktCollectionSourceType.WATCHLIST, "series"),
+            source(TraktCollectionSourceType.UP_NEXT, "series"),
+            source(TraktCollectionSourceType.UNWATCHED, "series"),
+            source(TraktCollectionSourceType.CALENDAR, "series").copy(calendarDays = 1),
+        ).map(CollectionSource::catalogRouteKey)
+
+        assertEquals(keys.size, keys.toSet().size)
+        assertTrue(keys.all { it.startsWith("trakt_") })
     }
 
     @Test

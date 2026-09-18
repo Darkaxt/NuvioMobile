@@ -6,14 +6,16 @@
 > cover player gaps that are not yet addressed upstream. It is not an official
 > Nuvio build.
 
-NuvioDV currently covers three focused player concerns:
+NuvioDV currently covers focused player and collection gaps:
 
 - improved Dolby Vision handling through a libdovi-enabled libmpv build;
 - an included libplacebo correction relevant to the late-playback pink-screen
   failure—the pink-screen issue is not being treated as a Dolby Vision issue;
   and
 - an optional player metadata row sourced from the active decoder, showing
-  resolution, codec, dynamic range, and frame rate.
+  resolution, codec, dynamic range, and frame rate; and
+- first-class authenticated Trakt collection sources for recommendations,
+  watchlists, Up Next, Recently Aired, and calendar rows.
 
 The Android app uses the package ID `com.darkaxt.nuviodv`, the visible name
 `NuvioDV`, and `NuvioDV-*.apk` output names, so it can be installed alongside
@@ -57,6 +59,23 @@ the release-visible base version and Android version code, verifies the fork's
 identity and patched player in a full Android build, pushes the merge, and then
 dispatches the release workflow. Unexpected merge conflicts fail closed for
 manual maintenance; no commit or release is created when upstream is unchanged.
+
+## Native Trakt collection sources
+
+The collection editor supports both public Trakt lists and authenticated
+account catalogues. Account catalogues reuse the Trakt account connected under
+Nuvio settings for the active profile; they do not require an AIOMetadata addon
+or a second Trakt login. Supported native rows are movie and series
+recommendations, movie and series watchlists, series Up Next, series Recently
+Aired, and a configurable series calendar window.
+
+The reconciled import that migrates the seven existing AIOMetadata-backed Trakt
+rows to these native sources is available locally at:
+
+`C:\Users\darka\Documents\Projects\Stremio Add-on Tester\output\nuvio-collections-kaptain-mega-hybrid-2026-09-18-nuviodv-trakt.reconciled.json`
+
+Connect Trakt in Nuvio settings before opening those rows. Existing imported
+public-list sources remain compatible and keep their list sorting controls.
 
 ## Upstream project
 
