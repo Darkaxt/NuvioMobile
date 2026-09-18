@@ -18,6 +18,20 @@ APP_UPDATER_REPOSITORY = (
     / "updater"
     / "AppUpdaterRepository.kt"
 )
+PLAYER_CONTROLS = (
+    REPOSITORY_ROOT
+    / "composeApp"
+    / "src"
+    / "commonMain"
+    / "kotlin"
+    / "com"
+    / "nuvio"
+    / "app"
+    / "features"
+    / "player"
+    / "PlayerControls.kt"
+)
+PLAYER_TIMELINE = PLAYER_CONTROLS.with_name("PlayerTimeline.kt")
 
 
 class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
@@ -26,6 +40,8 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
         cls.app_updater_repository = APP_UPDATER_REPOSITORY.read_text(encoding="utf-8")
+        cls.player_controls = PLAYER_CONTROLS.read_text(encoding="utf-8")
+        cls.player_timeline = PLAYER_TIMELINE.read_text(encoding="utf-8")
 
     def test_runs_daily_and_can_be_dispatched_manually(self) -> None:
         self.assertIn("schedule:", self.workflow)
@@ -87,6 +103,17 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
             "https://api.github.com/repos/NuvioMedia/NuvioMobile/",
             self.app_updater_repository,
         )
+
+    def test_playback_details_survive_both_player_control_layouts(self) -> None:
+        technical_details_binding = (
+            "technicalDetails = if (showTechnicalDetails) "
+            "playbackSnapshot.technicalDetailsLine() else null"
+        )
+        self.assertIn("showTechnicalDetails: Boolean", self.player_controls)
+        self.assertEqual(2, self.player_controls.count(technical_details_binding))
+        self.assertIn("technicalDetails: String?", self.player_timeline)
+        self.assertIn("if (!technicalDetails.isNullOrBlank())", self.player_timeline)
+        self.assertIn("text = technicalDetails", self.player_timeline)
 
 
 if __name__ == "__main__":
