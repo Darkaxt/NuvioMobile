@@ -19,6 +19,8 @@ Add first-class authenticated Trakt catalogue sources to NuvioDV, migrate the se
 - T9: Update the README to describe the native Trakt collection capability, authentication dependency, supported catalogue types, and import artifact.
 - T10: Publish a new normal GitHub release from the exact verified commit while preserving package `com.darkaxt.nuviodv`, app name `NuvioDV`, ARM64-only packaging, signing identity, and the patched libmpv/libdovi integration.
 - T11: Advance the same-base fork version from `0.4.23-nuviodv.1` to `0.4.23-nuviodv.2` and increment Android `versionCode` beyond `12214`.
+- T12: Native account-source exports must remain importable through the current Nuvio configuration website, whose validator requires a numeric `traktListId` for every Trakt source, without changing account-source semantics or colliding preservation keys.
+- T13: Publish normal patch release `v0.4.23-nuviodv.3` with Android `versionCode` greater than `12215`, preserving the package, label, ARM64 payload, signing identity, and patched player integration verified for the initial native Trakt release.
 
 ## Acceptance Criteria
 
@@ -32,6 +34,8 @@ Add first-class authenticated Trakt catalogue sources to NuvioDV, migrate the se
 - TC8: The normal GitHub release `v0.4.23-nuviodv.2` is published from the exact verified source commit and is returned as the latest release.
 - TC9: The published APK independently verifies package, label, version name/code, ARM64-only payload, expected signing certificate, and libdovi symbols.
 - TC10: Final reconciliation records zero blockers and zero unresolved tracked deferrals.
+- TC11: Exported account sources contain compatibility value `traktListId: 0`, public lists retain their real positive IDs, account-source preservation keys distinguish source type/media/calendar window, and the reconciled JSON passes the current website validator.
+- TC12: Release `v0.4.23-nuviodv.3` is published from the exact verified compatibility-fix commit, is returned as the latest normal release, and its APK independently passes the established package/version/ABI/signing/libdovi checks.
 
 ## Source Semantics
 
@@ -56,9 +60,10 @@ The serialized field is `traktSourceType`. Missing `traktSourceType` plus a non-
 | Editor integration | COMPLETE | T6, T7 | TC3 passed in `CollectionEditorTraktSourceTest`; account/public-list mode selection, dual-media creation, series-only constraints, calendar bounds, and legacy public-list edit state verified |
 | Collection migration | COMPLETE | T8 | TC5 passed for `nuvio-collections-kaptain-mega-hybrid-2026-09-18-nuviodv-trakt.reconciled.json`; seven native sources, zero AIOMetadata Trakt refs, unrelated semantic JSON preserved, decade order and Anime placement verified |
 | Documentation and release | COMPLETE | T9-T11 | TC4 and TC6-TC9 passed; full debug build succeeded, README/version updated, source `83f45109c6ab570744a465cf69333c66b3817be9` pushed, and normal release `v0.4.23-nuviodv.2` independently verified |
-| Final reconciliation | COMPLETE | T1-T11 | TC10 passed; every requirement and acceptance criterion is satisfied, with zero blockers and zero tracked deferrals |
+| Final reconciliation | COMPLETE | T1-T11 | TC10 passed for the initial native Trakt implementation, with zero blockers and zero tracked deferrals at that boundary |
+| Website import compatibility | ACTIVE | T12, T13 | TC11, TC12; repaired artifact passes the website rule, app export/preservation tests pass, patch release pending |
 
-Blockers: none.
+Blockers: the `v0.4.23-nuviodv.2` import artifact is rejected by the current website because explicit account sources omit its required numeric `traktListId` compatibility field.
 
 Tracked deferrals: none.
 

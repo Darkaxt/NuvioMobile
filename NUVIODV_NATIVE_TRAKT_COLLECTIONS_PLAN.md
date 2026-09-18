@@ -53,3 +53,13 @@ Status: `COMPLETE`
 
 - Reconcile every T requirement and TC acceptance criterion.
 - Record final evidence, blockers, and deferrals in the specification.
+
+## Stage 7: Website Import Compatibility
+
+Status: `ACTIVE`
+
+- Reproduce the current website validator contract for Trakt sources.
+- Emit numeric compatibility list IDs for explicit account sources without changing their semantics.
+- Fix account-source raw JSON preservation keys so distinct account catalogue types cannot collide.
+- Regenerate and validate the reconciled import artifact.
+- Publish and independently verify patch release `v0.4.23-nuviodv.3`, then reconcile T12-T13 and TC11-TC12.

@@ -7,6 +7,7 @@ import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -123,6 +124,49 @@ class CollectionSourceSerializationTest {
             sources.map { it.traktSourceType },
             decoded.map { it.resolvedTraktSourceType.value },
         )
+    }
+
+    @Test
+    fun authenticatedTraktSourcesExportWithWebsiteCompatibilityListId() {
+        val collection = Collection(
+            id = "collection-1",
+            title = "Discover",
+            folders = listOf(
+                CollectionFolder(
+                    id = "folder-1",
+                    title = "For You",
+                    sources = listOf(
+                        CollectionSource(
+                            provider = "trakt",
+                            title = "Recommended Movies",
+                            traktSourceType = TraktCollectionSourceType.RECOMMENDATIONS.value,
+                            mediaType = TmdbCollectionMediaType.MOVIE.value,
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val merged = CollectionJsonPreserver.merge(
+            json = json,
+            rawCollectionsJson = json.parseToJsonElement("[]"),
+            collections = listOf(collection),
+        )
+        val sourceObject = merged.single()
+            .jsonObject["folders"]!!
+            .jsonArray.single()
+            .jsonObject["sources"]!!
+            .jsonArray.single()
+            .jsonObject
+
+        assertEquals(0L, sourceObject["traktListId"]!!.jsonPrimitive.long)
+        assertEquals(
+            TraktCollectionSourceType.RECOMMENDATIONS.value,
+            sourceObject["traktSourceType"]!!.jsonPrimitive.content,
+        )
+        val decoded = json.decodeFromJsonElement(CollectionSource.serializer(), sourceObject)
+        assertEquals(TraktCollectionSourceType.RECOMMENDATIONS, decoded.resolvedTraktSourceType)
+        assertFalse(decoded.hasInvalidTraktListId())
     }
 
     @Test
@@ -378,6 +422,64 @@ class CollectionSourceSerializationTest {
         val merged = CollectionJsonPreserver.merge(json, raw, listOf(collection)).toString()
         assertTrue(merged.contains(""""customField":"keep-me""""))
         assertTrue(merged.contains(""""traktListId":123456"""))
+    }
+
+    @Test
+    fun accountSourcePreservationKeysDoNotCollide() {
+        val raw = json.parseToJsonElement(
+            """
+                [
+                  {
+                    "id": "collection-1",
+                    "title": "Discover",
+                    "folders": [
+                      {
+                        "id": "folder-1",
+                        "title": "For You",
+                        "sources": [
+                          {
+                            "provider": "trakt",
+                            "traktSourceType": "recommendations",
+                            "traktListId": 0,
+                            "mediaType": "movie",
+                            "customField": "recommendations-marker"
+                          },
+                          {
+                            "provider": "trakt",
+                            "traktSourceType": "watchlist",
+                            "traktListId": 0,
+                            "mediaType": "movie",
+                            "customField": "watchlist-marker"
+                          },
+                          {
+                            "provider": "trakt",
+                            "traktSourceType": "calendar",
+                            "traktListId": 0,
+                            "mediaType": "tv",
+                            "calendarDays": 1,
+                            "customField": "calendar-marker"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+            """.trimIndent(),
+        )
+        val collection = json.decodeFromString<List<Collection>>(raw.toString()).single()
+
+        val mergedSources = CollectionJsonPreserver.merge(json, raw, listOf(collection))
+            .single()
+            .jsonObject["folders"]!!
+            .jsonArray.single()
+            .jsonObject["sources"]!!
+            .jsonArray
+
+        assertEquals(
+            listOf("recommendations-marker", "watchlist-marker", "calendar-marker"),
+            mergedSources.map { it.jsonObject["customField"]!!.jsonPrimitive.content },
+        )
+        assertTrue(mergedSources.all { it.jsonObject["traktListId"]!!.jsonPrimitive.long == 0L })
     }
 
     @Test

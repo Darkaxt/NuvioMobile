@@ -175,7 +175,7 @@ jobs:
           - Signing certificate SHA-256: \`${SIGNER_SHA256}\`
           - Player: patched libmpv with libdovi and the independent libplacebo pink-screen correction
           - Playback details: optional live resolution, codec, dynamic range, and frame-rate row
-          - Collections: native authenticated Trakt recommendations, watchlists, Up Next, Recently Aired, and calendar sources
+          - Collections: native authenticated Trakt recommendations, watchlists, Up Next, Recently Aired, and calendar sources with website-compatible exports
           - Authentication: Nuvio account, Trakt, and Simkl runtime configuration restored
 
           This is an unofficial personal fork of NuvioMobile. Full Dolby Vision Profile 7 FEL decoding is not claimed.
