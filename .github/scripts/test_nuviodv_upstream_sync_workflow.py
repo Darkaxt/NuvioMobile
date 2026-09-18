@@ -5,7 +5,7 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "nuviodv-upstream-sync.yml"
 RELEASE_WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "nuviodv-android-release.yml"
-APP_UPDATER = (
+APP_UPDATER_REPOSITORY = (
     REPOSITORY_ROOT
     / "composeApp"
     / "src"
@@ -16,7 +16,7 @@ APP_UPDATER = (
     / "app"
     / "features"
     / "updater"
-    / "AppUpdater.kt"
+    / "AppUpdaterRepository.kt"
 )
 
 
@@ -25,7 +25,7 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
-        cls.app_updater = APP_UPDATER.read_text(encoding="utf-8")
+        cls.app_updater_repository = APP_UPDATER_REPOSITORY.read_text(encoding="utf-8")
 
     def test_runs_daily_and_can_be_dispatched_manually(self) -> None:
         self.assertIn("schedule:", self.workflow)
@@ -79,13 +79,13 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertNotIn("--prerelease", self.release_workflow)
 
     def test_in_app_updater_uses_the_fork_release_feed(self) -> None:
-        self.assertIn('private const val gitHubOwner = "Darkaxt"', self.app_updater)
-        self.assertNotIn('private const val gitHubOwner = "NuvioMedia"', self.app_updater)
-        self.assertNotIn("releaseChannelBranch", self.app_updater)
-        self.assertNotIn("matchesRequestedChannel", self.app_updater)
         self.assertIn(
-            "releases.firstOrNull { !it.draft && !it.prerelease }",
-            self.app_updater,
+            'url = "https://api.github.com/repos/Darkaxt/NuvioMobile/${releasePath(channel)}"',
+            self.app_updater_repository,
+        )
+        self.assertNotIn(
+            "https://api.github.com/repos/NuvioMedia/NuvioMobile/",
+            self.app_updater_repository,
         )
 
 
