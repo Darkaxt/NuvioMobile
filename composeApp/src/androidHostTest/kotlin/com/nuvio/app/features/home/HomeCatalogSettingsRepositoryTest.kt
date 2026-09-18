@@ -31,6 +31,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -228,6 +229,50 @@ class HomeCatalogSettingsRepositoryTest {
         assertEquals(settings, HomeCatalogSettingsRepository.uiState.value)
     }
 
+    @Test
+    fun rebuildCollectionLayoutDropsStaleRowsAndUsesCurrentCollectionOrder() {
+        val catalogKey = "test:movie:popular"
+        val collections = listOf(
+            collection().copy(id = "favorites", title = "Favorites", pinToTop = true),
+            collection().copy(id = "anime", title = "Anime", pinToTop = true),
+            collection().copy(id = "nsfw", title = "NSFW", pinToTop = true),
+        )
+        HomeCatalogSettingsRepository.syncCatalogs(listOf(addon()))
+        HomeCatalogSettingsRepository.syncCollections(collections)
+        HomeCatalogSettingsRepository.applyFromRemote(
+            SyncHomeCatalogPayload(
+                items = listOf(
+                    syncCollectionItem("nsfw", order = 0),
+                    syncCollectionItem("removed", order = 1),
+                    syncCollectionItem("favorites", order = 2),
+                    syncCollectionItem("anime", order = 3),
+                    SyncCatalogItem(
+                        addonId = "test",
+                        type = "movie",
+                        catalogId = "popular",
+                        enabled = false,
+                        order = 4,
+                        customTitle = "Keep this title",
+                        key = catalogKey,
+                    ),
+                ),
+            ),
+        )
+        assertTrue(HomeCatalogSettingsRepository.exportToSyncPayload().items.any { it.key == "collection_removed" })
+
+        HomeCatalogSettingsRepository.rebuildCollectionLayout(collections)
+
+        val rebuilt = HomeCatalogSettingsRepository.exportToSyncPayload()
+        assertEquals(
+            listOf("collection_favorites", "collection_anime", "collection_nsfw", catalogKey),
+            rebuilt.items.map { it.key },
+        )
+        assertFalse(rebuilt.items.any { it.key == "collection_removed" })
+        val catalog = rebuilt.items.single { it.key == catalogKey }
+        assertFalse(catalog.enabled)
+        assertEquals("Keep this title", catalog.customTitle)
+    }
+
     private fun addon() = ManagedAddon(
         manifestUrl = "https://example.com/manifest.json",
         manifest = AddonManifest(
@@ -246,6 +291,16 @@ class HomeCatalogSettingsRepositoryTest {
         id = "favorites",
         title = "Favorites",
         folders = listOf(CollectionFolder(id = "movies", title = "Movies")),
+    )
+
+    private fun syncCollectionItem(collectionId: String, order: Int) = SyncCatalogItem(
+        addonId = "",
+        type = "",
+        catalogId = "",
+        order = order,
+        isCollection = true,
+        collectionId = collectionId,
+        key = "collection_$collectionId",
     )
 
     private class RecordingPreferences(
