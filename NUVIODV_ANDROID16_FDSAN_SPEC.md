@@ -28,8 +28,19 @@ Authorization: `already_authorized` by the user on 2026-09-18.
 | --- | --- | --- | --- |
 | Reproduce and isolate | COMPLETE | FDSAN-1-FDSAN-3 | ADB exit history, crash tombstones, and timestamped libmpv logs identify the unsupported subprocess path |
 | Disable unsupported subprocess resolution | COMPLETE | FDSAN-1-FDSAN-3 | Focused red/green host test, all Android player host tests, and full-debug APK build pass |
-| Device and release verification | ACTIVE | FDSAN-2, FDSAN-4 | Direct-playback log inspection, release workflow, and independent APK inspection |
+| Device and release verification | BLOCKED | FDSAN-2, FDSAN-4 | Release and install verification pass; direct-playback log inspection is blocked by the tablet's secure keyguard |
 
-Blockers: none.
+Release evidence:
+
+- Commit `5de24225c9af0df412ab9ba2b59cd4c06bbefce7` is pushed to `cmp-rewrite`.
+- Workflow run `35367593482` built, verified, and published the signed ARM64 APK.
+- Release `v0.4.23-nuviodv.6` targets the exact verified commit.
+- The published APK reports package `com.darkaxt.nuviodv`, version `0.4.23-nuviodv.6`, version code `12219`, and ARM64-only native libraries.
+- The published APK contains the RPDB logo and libmpv/libdovi symbols; its SHA-256 matches the GitHub release digest.
+- The signed APK installs successfully on Samsung tablet `R52W60CFTRL` and the installed package reports version code `12219`.
+
+Blocker:
+
+- AC3 is externally blocked because `R52W60CFTRL` is secured by an active keyguard with input restricted. The condition resolves when the tablet is unlocked, after which direct playback can be launched and logcat checked for `ytdl_hook`, `Subprocess failed`, and `fdsan`.
 
 Tracked deferrals: none.

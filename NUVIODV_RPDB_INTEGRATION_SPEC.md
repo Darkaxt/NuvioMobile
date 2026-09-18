@@ -98,7 +98,7 @@ Tracked deferrals: none.
 
 Verification:
 
-- Requirements `RPDB-1` through `RPDB-10` remain satisfied; `RPDB-11` is pending Stage 5 verification and release.
+- Requirements `RPDB-1` through `RPDB-11` are satisfied.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
@@ -131,7 +131,7 @@ Repository baseline note:
 
 ### Stage 5: Branded integration icon release
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `RPDB-11`
 
@@ -140,3 +140,11 @@ Acceptance evidence required:
 - The RPDB integration row uses the shared cross-platform branded painter path on phone and tablet layouts.
 - Android compilation packages the RPDB logo resource successfully.
 - Signed release `v0.4.23-nuviodv.6` publishes package `com.darkaxt.nuviodv` with version code `12219`.
+
+Release evidence:
+
+- Workflow: `https://github.com/Darkaxt/NuvioMobile/actions/runs/35367593482`
+- Release: `https://github.com/Darkaxt/NuvioMobile/releases/tag/v0.4.23-nuviodv.6`
+- Source commit: `5de24225c9af0df412ab9ba2b59cd4c06bbefce7`
+- Published APK SHA-256: `3f7e4d6ac67578bc3061556c6cdb1c1f44991b8512253e8dfa6d84c8ec91bd40`
+- Independent inspection confirms package `com.darkaxt.nuviodv`, version `0.4.23-nuviodv.6`, version code `12219`, ARM64-only native libraries, and packaged `rpdb_logo.svg`.
