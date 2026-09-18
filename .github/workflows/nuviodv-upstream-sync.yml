@@ -64,6 +64,7 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           allowed_conflict='iosApp/Configuration/Version.xcconfig'
+          pre_merge_head="$(git rev-parse HEAD)"
 
           set +e
           git merge --no-commit --no-ff upstream/cmp-rewrite
@@ -90,6 +91,17 @@ jobs:
             git merge --abort
             exit 1
           fi
+
+          mapfile -t workflow_changes < <(
+            git diff --name-only "${pre_merge_head}" -- .github/workflows
+          )
+          for workflow_path in "${workflow_changes[@]}"; do
+            if git cat-file -e "${pre_merge_head}:${workflow_path}" 2>/dev/null; then
+              git checkout "${pre_merge_head}" -- "${workflow_path}"
+            else
+              git rm -- "${workflow_path}"
+            fi
+          done
 
       - name: Advance the NuvioDV release version
         if: steps.upstream.outputs.has_updates == 'true'

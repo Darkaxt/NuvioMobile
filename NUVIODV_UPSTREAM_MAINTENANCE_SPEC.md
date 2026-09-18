@@ -15,6 +15,8 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - M9: Issue monitoring must not comment on upstream issues or automatically broaden the fork. It reports only evidence-backed candidates worth considering and stays quiet when neither maintenance nor issue triage produces an actionable change.
 - M10: Public release history must contain only tags whose left-side version matches the upstream release represented by their source commit. Superseded misnumbered releases and tags must be removed after their audit metadata is recorded.
 - M11: The canonical retained releases are `v0.4.17-nuviodv.5`, `v0.4.18-nuviodv.1`, `v0.4.18-nuviodv.2`, and `v0.4.19-nuviodv.1`; all four must be normal releases, and `v0.4.19-nuviodv.1` must remain the latest release.
+- M12: The NuvioDV in-app updater must query `Darkaxt/NuvioMobile` normal releases, not the upstream `NuvioMedia/NuvioMobile` feed.
+- M13: Upstream synchronization must preserve the fork's `.github/workflows` tree so the default GitHub Actions token never attempts a forbidden workflow-file push; upstream application history and all non-workflow files remain mergeable.
 
 ## Acceptance criteria
 
@@ -25,6 +27,8 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - MC5: Repository changes and maintenance evidence are committed and pushed to `cmp-rewrite`.
 - MC6: Release-policy tests reject prerelease inputs/flags and prove the daily sync dispatches the normal release workflow.
 - MC7: A fresh GitHub API audit proves only the four canonical releases/tags remain, all are normal releases, and the latest release is `v0.4.19-nuviodv.1`.
+- MC8: A regression contract fails against the upstream updater owner and passes only when the in-app release feed owner is `Darkaxt`.
+- MC9: A regression contract proves upstream workflow-file changes are restored to the pre-merge fork tree before commit/push, while a real pending-upstream sync reaches zero commits behind and publishes the exact verified normal release.
 
 ## Stage and reconciliation ledger
 
@@ -33,9 +37,10 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | Daily verified upstream sync and release | COMPLETE | M1-M6 | Runs 34665705660 and 34666617695 consumed the initial pending commits; source-SHA input fixes branch-ref propagation race; run 34667333366 verified the unchanged-upstream no-op path; version contract corrected in `61e4eb15`; on 2026-09-13 run 34723027169 failed closed on four overlapping player-settings files plus the expected version conflict, after which merge `b62001d` retained both upstream settings and NuvioDV playback details and release run 34723777285 published verified prerelease `v0.4.18-nuviodv.1`; on 2026-09-14 sync run 34786755533 consumed seven upstream commits without conflicts and release run 34787071223 published verified prerelease `v0.4.19-nuviodv.1` from exact source `4ea1125` |
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
 | Public release-lineage repair | COMPLETE | M6, M10-M11 | Commit `3f063f84` removed the prerelease input/flag paths and made normal releases the enforced workflow contract; invalid releases/tags `v0.4.17-nuviodv.1`, `v0.4.17-nuviodv.2`, `v0.4.20-nuviodv.1`, and `v0.4.21-nuviodv.1` were deleted; the four canonical releases remain, all normal, with `v0.4.19-nuviodv.1` Latest |
-| Final reconciliation | COMPLETE | M1-M11 | MC1-MC7 satisfied; fork contains current upstream, workflows and heartbeat active, canonical public release history verified, blockers and tracked deferrals equal zero |
+| Fork updater and workflow-permission repair | ACTIVE | M12-M13 | Root causes confirmed: `AppUpdater.kt` selects `NuvioMedia`; runs 35205432333 and 35327470164 fail only when GitHub rejects upstream changes to stock workflow files; MC8/MC9 regression contracts added red-first |
+| Final reconciliation | NOT STARTED | M1-M13 | Requires MC1-MC9 with blockers and tracked deferrals equal zero |
 
-Blockers: none.
+Blockers: fork updater and workflow-permission repairs are not yet implemented; upstream is 24 commits ahead.
 
 Tracked deferrals: none.
 

@@ -5,6 +5,19 @@ from pathlib import Path
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "nuviodv-upstream-sync.yml"
 RELEASE_WORKFLOW = REPOSITORY_ROOT / ".github" / "workflows" / "nuviodv-android-release.yml"
+APP_UPDATER = (
+    REPOSITORY_ROOT
+    / "composeApp"
+    / "src"
+    / "commonMain"
+    / "kotlin"
+    / "com"
+    / "nuvio"
+    / "app"
+    / "features"
+    / "updater"
+    / "AppUpdater.kt"
+)
 
 
 class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
@@ -12,6 +25,7 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.release_workflow = RELEASE_WORKFLOW.read_text(encoding="utf-8")
+        cls.app_updater = APP_UPDATER.read_text(encoding="utf-8")
 
     def test_runs_daily_and_can_be_dispatched_manually(self) -> None:
         self.assertIn("schedule:", self.workflow)
@@ -32,6 +46,12 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertIn("allowed_conflict='iosApp/Configuration/Version.xcconfig'", self.workflow)
         self.assertIn('[[ "${conflicts[0]}" == "${allowed_conflict}" ]]', self.workflow)
         self.assertIn("git merge --abort", self.workflow)
+
+    def test_preserves_fork_workflows_during_upstream_merges(self) -> None:
+        self.assertIn('pre_merge_head="$(git rev-parse HEAD)"', self.workflow)
+        self.assertIn('git diff --name-only "${pre_merge_head}" -- .github/workflows', self.workflow)
+        self.assertIn('git checkout "${pre_merge_head}" -- "${workflow_path}"', self.workflow)
+        self.assertIn('git rm -- "${workflow_path}"', self.workflow)
 
     def test_verifies_the_fork_before_push(self) -> None:
         self.assertIn("test_advance_nuviodv_version.py", self.workflow)
@@ -57,6 +77,16 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertNotIn("authenticated prerelease", self.workflow)
         self.assertNotIn("prerelease:", self.release_workflow)
         self.assertNotIn("--prerelease", self.release_workflow)
+
+    def test_in_app_updater_uses_the_fork_release_feed(self) -> None:
+        self.assertIn('private const val gitHubOwner = "Darkaxt"', self.app_updater)
+        self.assertNotIn('private const val gitHubOwner = "NuvioMedia"', self.app_updater)
+        self.assertNotIn("releaseChannelBranch", self.app_updater)
+        self.assertNotIn("matchesRequestedChannel", self.app_updater)
+        self.assertIn(
+            "releases.firstOrNull { !it.draft && !it.prerelease }",
+            self.app_updater,
+        )
 
 
 if __name__ == "__main__":
