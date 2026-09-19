@@ -19,6 +19,9 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-9`: Cover the resolver, settings policy, and credential handling with focused tests.
 - `RPDB-10`: Publish the verified integration as a signed NuvioDV Android release with a version newer than the installed test build.
 - `RPDB-11`: Display the branded RPDB icon in the General > Integrations row on phone and tablet layouts.
+- `RPDB-12`: Inventory every portrait-bearing production renderer and ensure compatible movie/series portraits use the shared RPDB resolver, including portrait-style Continue Watching cards whose model is not `MetaPreview`.
+- `RPDB-13`: Continue Watching portrait cards must preserve the original artwork as the display fallback when the RPDB request fails.
+- `RPDB-14`: Continue Watching card/wide landscape artwork, episode-thumbnail behavior, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
 
 ## Acceptance Criteria
 
@@ -33,6 +36,9 @@ The user requested RPDB support under General > Integrations and specified that 
 9. Focused common tests and the applicable Android compile/test tasks pass.
 10. The signed GitHub release identifies RPDB support and its APK reports the new NuvioDV version and version code.
 11. The RPDB integration row renders a bundled branded RPDB icon instead of the generic image glyph.
+12. A repository-wide portrait-renderer audit has no compatible movie/series portrait path that bypasses RPDB solely because it uses a non-`MetaPreview` model.
+13. Portrait-style Continue Watching items with compatible IMDb/TMDB identifiers select RPDB first and fall back to their original poster after a load failure.
+14. Continue Watching landscape styles and unsupported/non-media items retain their existing artwork selection.
 
 ## Staged Plan And Reconciliation Ledger
 
@@ -148,3 +154,30 @@ Release evidence:
 - Source commit: `5de24225c9af0df412ab9ba2b59cd4c06bbefce7`
 - Published APK SHA-256: `3f7e4d6ac67578bc3061556c6cdb1c1f44991b8512253e8dfa6d84c8ec91bd40`
 - Independent inspection confirms package `com.darkaxt.nuviodv`, version `0.4.23-nuviodv.6`, version code `12219`, ARM64-only native libraries, and packaged `rpdb_logo.svg`.
+
+### Stage 6: Portrait-path QA and gap remediation
+
+Status: `ACTIVE`
+
+Requirements: `RPDB-12`, `RPDB-13`, `RPDB-14`
+
+Objective:
+
+- Integrate the current upstream baseline before modifying portrait rendering.
+- Inventory portrait-bearing production renderers and compare each compatible path with the shared RPDB contract.
+- Add regression coverage before repairing every verified bypass.
+
+Acceptance evidence required:
+
+- The maintained branch contains the current upstream history without discarding NuvioDV behavior.
+- A focused regression test fails against each verified bypass before production code changes and passes afterward.
+- Compatible Continue Watching portrait items select RPDB with their original poster as fallback.
+- Landscape, unsupported-ID, non-movie/series, episode-thumbnail, and cloud-library behavior remains unchanged.
+- Focused RPDB/Continue Watching tests and the integrated Android debug build pass.
+- A final repository-wide call-site audit finds no remaining compatible portrait bypass.
+
+Evidence: pending.
+
+Blockers: none.
+
+Tracked deferrals: none.
