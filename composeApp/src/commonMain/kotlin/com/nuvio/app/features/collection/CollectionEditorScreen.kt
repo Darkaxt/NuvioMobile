@@ -34,6 +34,7 @@ import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,7 +59,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.animateDpAsState
-import com.nuvio.app.core.ui.Chip
 import com.nuvio.app.core.ui.NuvioInputField
 import com.nuvio.app.core.ui.NuvioModalBottomSheet
 import com.nuvio.app.core.ui.NuvioPrimaryButton
@@ -66,8 +66,8 @@ import com.nuvio.app.core.ui.NuvioScreen
 import com.nuvio.app.core.ui.NuvioScreenHeader
 import com.nuvio.app.core.ui.NuvioSectionLabel
 import com.nuvio.app.core.ui.NuvioSurfaceCard
-import com.nuvio.app.core.ui.PlatformBackHandler
 import com.nuvio.app.core.ui.nuvioSafeBottomPadding
+import com.nuvio.app.core.ui.PlatformBackHandler
 import com.nuvio.app.features.home.PosterShape
 import com.nuvio.app.features.trakt.TraktPublicListSearchResult
 import nuvio.composeapp.generated.resources.*
@@ -325,7 +325,7 @@ fun CollectionEditorScreen(
                         FolderViewMode.entries
                             .filter { it != FolderViewMode.FOLLOW_LAYOUT }
                             .forEach { mode ->
-                            Chip(
+                            FilterChip(
                                 selected = state.viewMode == mode,
                                 onClick = { CollectionEditorRepository.setViewMode(mode) },
                                 label = {
@@ -693,12 +693,12 @@ private fun FolderEditorPage(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    Chip(
+                                    FilterChip(
                                         selected = folder.coverEmoji == null && folder.coverImageUrl == null,
                                         onClick = { CollectionEditorRepository.clearFolderCover() },
                                         label = { Text(stringResource(Res.string.collections_editor_cover_none)) },
                                     )
-                                    Chip(
+                                    FilterChip(
                                         selected = folder.coverEmoji != null,
                                         onClick = {
                                             if (folder.coverEmoji == null) {
@@ -707,7 +707,7 @@ private fun FolderEditorPage(
                                         },
                                         label = { Text(stringResource(Res.string.collections_editor_cover_emoji)) },
                                     )
-                                    Chip(
+                                    FilterChip(
                                         selected = folder.coverImageUrl != null,
                                         onClick = {
                                             if (folder.coverImageUrl == null) {
@@ -758,7 +758,7 @@ private fun FolderEditorPage(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
                                     PosterShape.entries.forEach { shape ->
-                                        Chip(
+                                        FilterChip(
                                             selected = folder.posterShape == shape,
                                             onClick = { CollectionEditorRepository.updateFolderTileShape(shape) },
                                             label = { Text(posterShapeLabel(shape)) },
@@ -1068,7 +1068,7 @@ private fun TmdbSourcePickerScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     TmdbBuilderMode.entries.forEach { mode ->
-                        Chip(
+                        FilterChip(
                             selected = state.tmdbBuilderMode == mode,
                             onClick = { CollectionEditorRepository.setTmdbBuilderMode(mode) },
                             label = { Text(tmdbBuilderModeLabel(mode)) },
@@ -1194,7 +1194,7 @@ private fun TmdbSourcePickerScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
-                                Chip(
+                                FilterChip(
                                     selected = state.tmdbMediaType == TmdbCollectionMediaType.MOVIE && !state.tmdbMediaBoth,
                                     onClick = {
                                         CollectionEditorRepository.setTmdbMediaBoth(false)
@@ -1202,7 +1202,7 @@ private fun TmdbSourcePickerScreen(
                                     },
                                     label = { Text(stringResource(Res.string.collections_editor_tmdb_movies)) },
                                 )
-                                Chip(
+                                FilterChip(
                                     selected = state.tmdbMediaType == TmdbCollectionMediaType.TV && !state.tmdbMediaBoth,
                                     onClick = {
                                         CollectionEditorRepository.setTmdbMediaBoth(false)
@@ -1210,7 +1210,7 @@ private fun TmdbSourcePickerScreen(
                                     },
                                     label = { Text(stringResource(Res.string.collections_editor_tmdb_series)) },
                                 )
-                                Chip(
+                                FilterChip(
                                     selected = state.tmdbMediaBoth,
                                     onClick = { CollectionEditorRepository.setTmdbMediaBoth(true) },
                                     label = { Text(stringResource(Res.string.collections_editor_tmdb_both)) },
@@ -1240,7 +1240,7 @@ private fun TmdbSourcePickerScreen(
                                     },
                                 )
                                 sorts.forEach { sort ->
-                                    Chip(
+                                    FilterChip(
                                         selected = state.tmdbSortBy == sort.value,
                                         onClick = { CollectionEditorRepository.setTmdbSortBy(sort.value) },
                                         label = { Text(tmdbSortLabel(sort)) },
@@ -1668,12 +1668,12 @@ private fun TraktSourcePickerScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        Chip(
+                        FilterChip(
                             selected = !isPublicList,
                             onClick = { CollectionEditorRepository.setTraktBuilderMode(TraktBuilderMode.ACCOUNT) },
                             label = { Text(stringResource(Res.string.collections_editor_trakt_account_catalogues)) },
                         )
-                        Chip(
+                        FilterChip(
                             selected = isPublicList,
                             onClick = { CollectionEditorRepository.setTraktBuilderMode(TraktBuilderMode.PUBLIC_LIST) },
                             label = { Text(stringResource(Res.string.collections_editor_trakt_public_lists)) },
@@ -1724,7 +1724,7 @@ private fun TraktSourcePickerScreen(
                                 TraktCollectionSourceType.UNWATCHED to stringResource(Res.string.collections_editor_trakt_account_recently_aired),
                                 TraktCollectionSourceType.CALENDAR to stringResource(Res.string.collections_editor_trakt_account_calendar),
                             ).forEach { (sourceType, label) ->
-                                Chip(
+                                FilterChip(
                                     selected = state.traktAccountSourceType == sourceType,
                                     onClick = { CollectionEditorRepository.setTraktAccountSourceType(sourceType) },
                                     label = { Text(label) },
@@ -1744,7 +1744,7 @@ private fun TraktSourcePickerScreen(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
                                     (1..7).forEach { days ->
-                                        Chip(
+                                        FilterChip(
                                             selected = state.traktCalendarDays == days,
                                             onClick = { CollectionEditorRepository.setTraktCalendarDays(days) },
                                             label = { Text(days.toString()) },
@@ -1771,7 +1771,7 @@ private fun TraktSourcePickerScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         if (!seriesOnly || isPublicList) {
-                            Chip(
+                            FilterChip(
                                 selected = state.traktMediaType == TmdbCollectionMediaType.MOVIE && !state.traktMediaBoth,
                                 onClick = {
                                     CollectionEditorRepository.setTraktMediaBoth(false)
@@ -1780,7 +1780,7 @@ private fun TraktSourcePickerScreen(
                                 label = { Text(stringResource(Res.string.collections_editor_tmdb_movies)) },
                             )
                         }
-                        Chip(
+                        FilterChip(
                             selected = state.traktMediaType == TmdbCollectionMediaType.TV && !state.traktMediaBoth,
                             onClick = {
                                 CollectionEditorRepository.setTraktMediaBoth(false)
@@ -1789,7 +1789,7 @@ private fun TraktSourcePickerScreen(
                             label = { Text(stringResource(Res.string.collections_editor_tmdb_series)) },
                         )
                         if (!seriesOnly || isPublicList) {
-                            Chip(
+                            FilterChip(
                                 selected = state.traktMediaBoth,
                                 onClick = { CollectionEditorRepository.setTraktMediaBoth(true) },
                                 label = { Text(stringResource(Res.string.collections_editor_tmdb_both)) },
@@ -1807,7 +1807,7 @@ private fun TraktSourcePickerScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         traktSortOptions().forEach { (value, label) ->
-                            Chip(
+                            FilterChip(
                                 selected = state.traktSortBy == value,
                                 onClick = { CollectionEditorRepository.setTraktSortBy(value) },
                                 label = { Text(label) },
@@ -1826,12 +1826,12 @@ private fun TraktSourcePickerScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                            Chip(
+                            FilterChip(
                                 selected = state.traktSortHow == TraktSortHow.ASC.value,
                                 onClick = { CollectionEditorRepository.setTraktSortHow(TraktSortHow.ASC.value) },
                                 label = { Text(stringResource(Res.string.collections_editor_trakt_ascending)) },
                             )
-                            Chip(
+                            FilterChip(
                                 selected = state.traktSortHow == TraktSortHow.DESC.value,
                                 onClick = { CollectionEditorRepository.setTraktSortHow(TraktSortHow.DESC.value) },
                                 label = { Text(stringResource(Res.string.collections_editor_trakt_descending)) },
@@ -1965,7 +1965,7 @@ private fun PickerOptionRow(
     val bgColor = if (selected) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
     } else {
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     }
     Row(
         modifier = Modifier
@@ -2096,7 +2096,7 @@ private fun TmdbQuickChips(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             chips.forEach { (chipLabel, value) ->
-                Chip(
+                FilterChip(
                     selected = false,
                     onClick = { onSelect(value) },
                     label = { Text(chipLabel) },
@@ -2687,7 +2687,7 @@ private fun GenrePickerOptionRow(
     val bgColor = if (selected) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
     } else {
-        MaterialTheme.colorScheme.surfaceVariant
+        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
     }
     val borderColor = if (selected) {
         MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)

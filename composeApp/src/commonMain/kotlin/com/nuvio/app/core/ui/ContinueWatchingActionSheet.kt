@@ -18,7 +18,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.nuvio.app.features.cloud.CloudLibraryContentType
 import com.nuvio.app.features.cloud.cloudLibraryDisplayArtworkUrl
+import com.nuvio.app.features.rpdb.rpdbPortraitSelection
 import com.nuvio.app.features.watchprogress.ContinueWatchingItem
 import kotlinx.coroutines.launch
 import nuvio.composeapp.generated.resources.Res
@@ -116,6 +121,10 @@ private fun ContinueWatchingSheetHeader(
 ) {
     val posterCardStyle = rememberPosterCardStyleUiState()
     val tokens = MaterialTheme.nuvio
+    val sourceArtwork = item.poster ?: item.imageUrl
+    val rpdbPoster = item.rpdbPortraitSelection(sourceArtwork)
+    var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
+    val artwork = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
 
     Row(
         modifier = Modifier
@@ -131,13 +140,17 @@ private fun ContinueWatchingSheetHeader(
                 .background(tokens.colors.surfaceCard),
             contentAlignment = Alignment.Center,
         ) {
-            val artwork = item.poster ?: item.imageUrl
             if (artwork != null) {
                 AsyncImage(
                     model = cloudLibraryDisplayArtworkUrl(artwork),
                     contentDescription = item.title,
                     modifier = Modifier.matchParentSize(),
                     contentScale = if (item.isCloudLibraryItem()) ContentScale.Fit else ContentScale.Crop,
+                    onError = {
+                        if (!useFallbackPoster && !rpdbPoster.fallbackUrl.isNullOrBlank()) {
+                            useFallbackPoster = true
+                        }
+                    },
                 )
             } else {
                 Text(

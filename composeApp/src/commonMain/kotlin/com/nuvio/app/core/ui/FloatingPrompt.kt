@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -63,6 +64,7 @@ private const val SwipeDismissThreshold = 80f
 fun NuvioFloatingPrompt(
     visible: Boolean,
     imageUrl: String?,
+    fallbackImageUrl: String? = null,
     title: String,
     subtitle: String,
     progressFraction: Float,
@@ -79,6 +81,8 @@ fun NuvioFloatingPrompt(
     val hapticFeedback = LocalHapticFeedback.current
     val dragOffsetY = remember { Animatable(0f) }
     var promptHeightPx by remember { mutableIntStateOf(0) }
+    var useFallbackImage by remember(imageUrl, fallbackImageUrl) { mutableStateOf(false) }
+    val displayedImageUrl = if (useFallbackImage) fallbackImageUrl else imageUrl
     val actionWithHaptic = remember(hapticFeedback, onAction) {
         {
             hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -190,12 +194,17 @@ fun NuvioFloatingPrompt(
                                 .background(tokens.colors.surfaceCard),
                             contentAlignment = Alignment.Center,
                         ) {
-                            if (imageUrl != null) {
+                            if (displayedImageUrl != null) {
                                 AsyncImage(
-                                    model = imageUrl,
+                                    model = displayedImageUrl,
                                     contentDescription = null,
                                     modifier = Modifier.matchParentSize(),
                                     contentScale = ContentScale.Crop,
+                                    onError = {
+                                        if (!useFallbackImage && !fallbackImageUrl.isNullOrBlank()) {
+                                            useFallbackImage = true
+                                        }
+                                    },
                                 )
                             }
                         }

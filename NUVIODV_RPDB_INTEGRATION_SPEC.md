@@ -104,7 +104,7 @@ Tracked deferrals: none.
 
 Verification:
 
-- Requirements `RPDB-1` through `RPDB-11` are satisfied.
+- Requirements `RPDB-1` through `RPDB-14` are satisfied.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
@@ -157,7 +157,7 @@ Release evidence:
 
 ### Stage 6: Portrait-path QA and gap remediation
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `RPDB-12`, `RPDB-13`, `RPDB-14`
 
@@ -176,7 +176,17 @@ Acceptance evidence required:
 - Focused RPDB/Continue Watching tests and the integrated Android debug build pass.
 - A final repository-wide call-site audit finds no remaining compatible portrait bypass.
 
-Evidence: pending.
+Evidence:
+
+- The integrated merge tree contains upstream commit `90b58e2689e27c942ffb0b1d73f41d00c644195e` (`0.4.25`) while retaining the NuvioDV workflows, identity, version contract, and patched libmpv artifact.
+- The production image-renderer audit identified three compatible Continue Watching portrait bypasses: the poster row, the action-sheet header, and the launch resume prompt. All now use one shared Continue Watching RPDB resolver and retry the original source artwork after an RPDB load failure.
+- The renderer audit classified hero/backdrop, Card/Wide Continue Watching, episode, person/avatar, logo, folder-cover, cloud-library, and unsupported-ID images as intentionally outside the RPDB portrait contract; no compatible portrait bypass remains.
+- Regression tests failed before implementation for the three missing call sites and the episode-thumbnail boundary, then passed after the shared resolver and fallbacks were integrated.
+- Focused `RpdbPosterResolverTest`, `RpdbContinueWatchingArtworkTest`, `HomeContinueWatchingArtworkTest`, and `TraktIdUtilsTest` execution passes.
+- The portrait-coverage, version-advance, upstream-sync workflow, and authenticated release-configuration contracts pass; the portrait-coverage check is now part of the daily upstream-sync verification.
+- `:androidApp:assembleFullDebug` completes successfully after the final boundary fix.
+- The resulting APK reports package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.25-nuviodv.1`, and version code `12222`.
+- APK inspection finds one ARM64 `libmpv.so`; it is AArch64 and exports `dovi_parse_rpu`. The verified APK SHA-256 is `0dfcd43d32a017f0836b871d9b704bc434028cfe0e37f0035de88b0e7e2b4dac`.
 
 Blockers: none.
 

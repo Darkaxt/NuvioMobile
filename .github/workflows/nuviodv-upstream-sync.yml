@@ -122,6 +122,7 @@ jobs:
           set -euo pipefail
           python .github/scripts/test_advance_nuviodv_version.py
           python .github/scripts/test_nuviodv_upstream_sync_workflow.py
+          python .github/scripts/test_rpdb_portrait_coverage.py
           bash .github/scripts/test-configure-nuviodv-release.sh
 
       - name: Verify NuvioDV fork invariants
