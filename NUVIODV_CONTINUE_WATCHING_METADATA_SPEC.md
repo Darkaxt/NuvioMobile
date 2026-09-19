@@ -61,7 +61,7 @@ Tracked deferrals: none.
 
 ### Stage 2: Normal signed release
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `CWM-6`
 
@@ -71,14 +71,24 @@ Acceptance evidence required:
 - The normal release workflow succeeds for the exact source commit.
 - The public release and APK report the expected NuvioDV version, version code, package, signer, and checksum.
 
+Evidence:
+
+- Source commit `4424ff284db3600361175785911765fcc457933f` is pushed to `cmp-rewrite`.
+- GitHub Actions run `35463993025` completed successfully against that exact source commit and published the normal release.
+- Public release `v0.4.25-nuviodv.3` is neither a draft nor a prerelease.
+- The independently downloaded public APK reports package `com.darkaxt.nuviodv`, label `NuvioDV`, version name `0.4.25-nuviodv.3`, and version code `12224`.
+- The public APK SHA-256 is `49f14867e7e753c5420d747b205755a3897cad0a0293eb8d573ccd6e448377af`, matching the GitHub release asset digest.
+- APK Signature Scheme v2 verification succeeds with certificate SHA-256 `1fb94424753a90f993c678b6fa4322579253bb303f22c335db395a9e2557d571`.
+- The APK advertises only `arm64-v8a`, contains exactly one `lib/arm64-v8a/libmpv.so`, and that library exposes the `dovi_parse_rpu` symbol.
+
 Blockers: none.
 
 Tracked deferrals: none.
 
 ## Final Reconciliation
 
-Status: `NOT STARTED`
+Status: `COMPLETE`
 
 Blockers: none.
 
-Tracked deferrals: `CWM-6` until Stage 2 is complete.
+Tracked deferrals: none.
