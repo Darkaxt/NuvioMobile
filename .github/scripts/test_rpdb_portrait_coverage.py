@@ -18,6 +18,17 @@ class RpdbPortraitCoverageTest(unittest.TestCase):
         self.assertIn("rpdbPoster.fallbackUrl", poster_card)
         self.assertIn("onError =", poster_card)
 
+    def test_continue_watching_wide_portrait_strip_uses_rpdb_with_fallback(self):
+        source = CONTINUE_ROW.read_text(encoding="utf-8")
+        wide_card = source[
+            source.index("private fun ContinueWatchingWideCard(") :
+            source.index("private fun ContinueWatchingPosterCard(")
+        ]
+        self.assertIn("continueWatchingPosterArtworkUrl", wide_card)
+        self.assertIn("rpdbPortraitSelection", wide_card)
+        self.assertIn("rpdbPoster.fallbackUrl", wide_card)
+        self.assertIn("onError =", wide_card)
+
     def test_continue_watching_action_sheet_uses_rpdb_with_fallback(self):
         source = CONTINUE_SHEET.read_text(encoding="utf-8")
         header = source[source.index("private fun ContinueWatchingSheetHeader(") :]

@@ -21,7 +21,8 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-11`: Display the branded RPDB icon in the General > Integrations row on phone and tablet layouts.
 - `RPDB-12`: Inventory every portrait-bearing production renderer and ensure compatible movie/series portraits use the shared RPDB resolver, including portrait-style Continue Watching cards whose model is not `MetaPreview`.
 - `RPDB-13`: Continue Watching portrait cards must preserve the original artwork as the display fallback when the RPDB request fails.
-- `RPDB-14`: Continue Watching card/wide landscape artwork, episode-thumbnail behavior, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
+- `RPDB-14`: Continue Watching full-background Card artwork, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
+- `RPDB-15`: The portrait artwork strip inside the Continue Watching Wide layout must use the same RPDB-first, original-poster-fallback contract as other portrait Continue Watching renderers. A real poster takes priority over an episode thumbnail in this portrait-shaped slot; an episode thumbnail remains the fallback when no poster artwork exists.
 
 ## Acceptance Criteria
 
@@ -38,13 +39,14 @@ The user requested RPDB support under General > Integrations and specified that 
 11. The RPDB integration row renders a bundled branded RPDB icon instead of the generic image glyph.
 12. A repository-wide portrait-renderer audit has no compatible movie/series portrait path that bypasses RPDB solely because it uses a non-`MetaPreview` model.
 13. Portrait-style Continue Watching items with compatible IMDb/TMDB identifiers select RPDB first and fall back to their original poster after a load failure.
-14. Continue Watching landscape styles and unsupported/non-media items retain their existing artwork selection.
+14. Continue Watching full-background Card artwork and unsupported/non-media items retain their existing artwork selection.
+15. Continue Watching Wide items with compatible IMDb/TMDB identifiers select RPDB for the portrait strip and fall back to the original poster after a load failure; an episode thumbnail is used only when no poster artwork exists.
 
 ## Staged Plan And Reconciliation Ledger
 
 ### Stage 1: Core settings and resolver
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `RPDB-2`, `RPDB-3`, `RPDB-4`, `RPDB-5`, `RPDB-9`
 
@@ -104,7 +106,7 @@ Tracked deferrals: none.
 
 Verification:
 
-- Requirements `RPDB-1` through `RPDB-14` are satisfied.
+- Requirements `RPDB-1` through `RPDB-15` are satisfied.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
@@ -187,6 +189,38 @@ Evidence:
 - `:androidApp:assembleFullDebug` completes successfully after the final boundary fix.
 - The resulting APK reports package `com.darkaxt.nuviodv`, label `NuvioDV`, version `0.4.25-nuviodv.1`, and version code `12222`.
 - APK inspection finds one ARM64 `libmpv.so`; it is AArch64 and exports `dovi_parse_rpu`. The verified APK SHA-256 is `0dfcd43d32a017f0836b871d9b704bc434028cfe0e37f0035de88b0e7e2b4dac`.
+
+Blockers: none.
+
+Tracked deferrals: none.
+
+### Stage 7: Continue Watching Wide portrait remediation
+
+Status: `COMPLETE`
+
+Requirements: `RPDB-15`
+
+Objective:
+
+- Repair the device-reproduced Wide layout bypass without changing the landscape Card renderer or unrelated Continue Watching behavior.
+
+Acceptance evidence required:
+
+- A focused regression check fails before production changes because the Wide portrait strip bypasses the shared RPDB resolver and lacks original-artwork fallback.
+- Wide portrait artwork prefers the item's real poster, resolves it through RPDB, and retries the original poster after an RPDB image-load failure.
+- If no poster artwork exists, existing episode-thumbnail fallback behavior remains available.
+- The focused RPDB and Continue Watching checks pass.
+- The integrated Android debug build passes.
+
+Evidence:
+
+- ADB inspection of tablet `R52W60CFTRL` running `0.4.25-nuviodv.1` reproduced the issue in the Wide layout and showed that RPDB-backed metadata was available at runtime.
+- The Wide renderer was verified to use `continueWatchingArtworkUrl` directly while the Poster renderer alone used `rpdbPortraitSelection`; the regression check failed on this missing resolver/fallback contract before the production change.
+- The Wide portrait strip now uses `continueWatchingPosterArtworkUrl`, `rpdbPortraitSelection`, and the original poster as its image-load fallback. The unchanged poster selector retains episode thumbnails only when no poster-like artwork exists.
+- `.github/scripts/test_rpdb_portrait_coverage.py` passes with explicit Wide-layout coverage.
+- Focused `RpdbContinueWatchingArtworkTest` and `HomeContinueWatchingArtworkTest` execution passes.
+- `:androidApp:assembleFullDebug` completes successfully.
+- `git diff --check` reports no whitespace errors.
 
 Blockers: none.
 

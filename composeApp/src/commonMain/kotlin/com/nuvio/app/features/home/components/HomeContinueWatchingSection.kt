@@ -861,6 +861,10 @@ private fun ContinueWatchingWideCard(
     onLongClick: (() -> Unit)?,
 ) {
     val cornerRadius = rememberPosterCardStyleUiState().cornerRadiusDp.dp
+    val sourcePoster = item.continueWatchingPosterArtworkUrl(useEpisodeThumbnails)
+    val rpdbPoster = item.rpdbPortraitSelection(sourcePoster)
+    var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
+    val artworkUrl = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
     Row(
         modifier = Modifier
             .width(layout.wideCardWidth)
@@ -878,7 +882,6 @@ private fun ContinueWatchingWideCard(
                 onLongClick = onLongClick,
             ),
     ) {
-        val artworkUrl = item.continueWatchingArtworkUrl(useEpisodeThumbnails)
         val shouldBlurArtwork = item.shouldBlurContinueWatchingArtwork(
             blurUnwatchedEpisodes = blurNextUp,
             useEpisodeThumbnails = useEpisodeThumbnails,
@@ -889,6 +892,11 @@ private fun ContinueWatchingWideCard(
             width = layout.widePosterStripWidth,
             blurred = shouldBlurArtwork,
             contentScale = if (item.isCloudLibraryItem()) ContentScale.Fit else ContentScale.Crop,
+            onError = {
+                if (!useFallbackPoster && !rpdbPoster.fallbackUrl.isNullOrBlank()) {
+                    useFallbackPoster = true
+                }
+            },
             modifier = Modifier.fillMaxHeight(),
         )
         Column(
@@ -1127,6 +1135,7 @@ private fun ArtworkPanel(
     width: Dp,
     blurred: Boolean = false,
     contentScale: ContentScale = ContentScale.Crop,
+    onError: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -1142,6 +1151,7 @@ private fun ArtworkPanel(
                     .fillMaxSize()
                     .then(if (blurred) Modifier.blur(18.dp) else Modifier),
                 contentScale = contentScale,
+                onError = { onError?.invoke() },
             )
         }
     }
