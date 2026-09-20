@@ -166,6 +166,10 @@ private fun ContinueWatchingItem.continueWatchingArtworkUrl(
     )
 }
 
+internal fun ContinueWatchingItem.continueWatchingWideArtworkUrl(
+    useEpisodeThumbnails: Boolean,
+): String? = continueWatchingArtworkUrl(useEpisodeThumbnails)
+
 private fun ContinueWatchingItem.continueWatchingPosterArtworkUrl(
     useEpisodeThumbnails: Boolean,
 ): String? {
@@ -861,8 +865,8 @@ private fun ContinueWatchingWideCard(
     onLongClick: (() -> Unit)?,
 ) {
     val cornerRadius = rememberPosterCardStyleUiState().cornerRadiusDp.dp
-    val sourcePoster = item.continueWatchingPosterArtworkUrl(useEpisodeThumbnails)
-    val rpdbPoster = item.rpdbPortraitSelection(sourcePoster)
+    val sourceArtwork = item.continueWatchingWideArtworkUrl(useEpisodeThumbnails)
+    val rpdbPoster = item.rpdbPortraitSelection(sourceArtwork)
     var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
     val artworkUrl = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
     Row(

@@ -24,7 +24,8 @@ class RpdbPortraitCoverageTest(unittest.TestCase):
             source.index("private fun ContinueWatchingWideCard(") :
             source.index("private fun ContinueWatchingPosterCard(")
         ]
-        self.assertIn("continueWatchingPosterArtworkUrl", wide_card)
+        self.assertIn("continueWatchingWideArtworkUrl", wide_card)
+        self.assertNotIn("continueWatchingPosterArtworkUrl", wide_card)
         self.assertIn("rpdbPortraitSelection", wide_card)
         self.assertIn("rpdbPoster.fallbackUrl", wide_card)
         self.assertIn("onError =", wide_card)

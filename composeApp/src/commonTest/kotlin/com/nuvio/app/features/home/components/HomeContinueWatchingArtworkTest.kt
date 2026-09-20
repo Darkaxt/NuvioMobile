@@ -2,10 +2,23 @@ package com.nuvio.app.features.home.components
 
 import com.nuvio.app.features.watchprogress.ContinueWatchingItem
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class HomeContinueWatchingArtworkTest {
+    @Test
+    fun wideArtworkPreservesEpisodeThumbnailPreference() {
+        val item = item(progressFraction = 0.5f)
+
+        assertEquals("thumb.jpg", item.continueWatchingWideArtworkUrl(useEpisodeThumbnails = true))
+        assertEquals("poster.jpg", item.continueWatchingWideArtworkUrl(useEpisodeThumbnails = false))
+        assertEquals(
+            "poster.jpg",
+            item.copy(episodeThumbnail = null).continueWatchingWideArtworkUrl(useEpisodeThumbnails = true),
+        )
+    }
+
     @Test
     fun inProgressEpisodeThumbnailRemainsBlurredUntilWatched() {
         val item = item(progressFraction = 0.5f)

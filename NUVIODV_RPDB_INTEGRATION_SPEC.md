@@ -22,7 +22,7 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-12`: Inventory every portrait-bearing production renderer and ensure compatible movie/series portraits use the shared RPDB resolver, including portrait-style Continue Watching cards whose model is not `MetaPreview`.
 - `RPDB-13`: Continue Watching portrait cards must preserve the original artwork as the display fallback when the RPDB request fails.
 - `RPDB-14`: Continue Watching full-background Card artwork, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
-- `RPDB-15`: The portrait artwork strip inside the Continue Watching Wide layout must use the same RPDB-first, original-poster-fallback contract as other portrait Continue Watching renderers. A real poster takes priority over an episode thumbnail in this portrait-shaped slot; an episode thumbnail remains the fallback when no poster artwork exists.
+- `RPDB-15`: The artwork strip inside the Continue Watching Wide layout must preserve Nuvio's existing artwork priority. With episode thumbnails enabled, an available episode thumbnail remains primary. RPDB may replace a selected portrait poster, but must not change an episode-thumbnail selection into a series-poster selection. Existing fallbacks remain available when the preferred artwork is absent.
 
 ## Acceptance Criteria
 
@@ -40,7 +40,7 @@ The user requested RPDB support under General > Integrations and specified that 
 12. A repository-wide portrait-renderer audit has no compatible movie/series portrait path that bypasses RPDB solely because it uses a non-`MetaPreview` model.
 13. Portrait-style Continue Watching items with compatible IMDb/TMDB identifiers select RPDB first and fall back to their original poster after a load failure.
 14. Continue Watching full-background Card artwork and unsupported/non-media items retain their existing artwork selection.
-15. Continue Watching Wide items with compatible IMDb/TMDB identifiers select RPDB for the portrait strip and fall back to the original poster after a load failure; an episode thumbnail is used only when no poster artwork exists.
+15. Continue Watching Wide items preserve the original episode-thumbnail-first behavior when that preference is enabled; when a portrait poster is selected instead, compatible IMDb/TMDB identifiers may use RPDB with the original poster as fallback.
 
 ## Staged Plan And Reconciliation Ledger
 
@@ -221,6 +221,37 @@ Evidence:
 - Focused `RpdbContinueWatchingArtworkTest` and `HomeContinueWatchingArtworkTest` execution passes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
+
+Blockers: none.
+
+Tracked deferrals: none.
+
+### Stage 8: Restore Wide artwork priority
+
+Status: `COMPLETE`
+
+Requirements: corrected `RPDB-15`
+
+Objective:
+
+- Decouple RPDB fallback coverage from artwork selection and restore the pre-fix episode-thumbnail priority in the Wide layout.
+
+Acceptance evidence required:
+
+- A focused regression test fails against the current poster-first Wide selection before production changes.
+- With episode thumbnails enabled, Wide selects the episode thumbnail before the series poster.
+- With episode thumbnails disabled or absent, the existing poster and fallback chain remains intact.
+- RPDB continues to replace compatible selected portrait posters and preserves their source fallback without replacing selected episode thumbnails.
+- Focused Continue Watching/RPDB tests and the Android debug build pass.
+
+Evidence:
+
+- Before the production correction, `HomeContinueWatchingArtworkTest` failed to compile because the required Wide selector did not exist, and the portrait-coverage contract failed because Wide still called `continueWatchingPosterArtworkUrl`.
+- `continueWatchingWideArtworkUrl` delegates to Nuvio's original artwork selector: enabled episode thumbnails take priority, while disabling them restores poster-first selection.
+- The Wide renderer passes the selected artwork through `rpdbPortraitSelection`; its existing episode-thumbnail guard leaves selected thumbnails unchanged, while selected posters retain RPDB and original-poster fallback behavior.
+- Focused `HomeContinueWatchingArtworkTest` and `RpdbContinueWatchingArtworkTest` execution passes.
+- `.github/scripts/test_rpdb_portrait_coverage.py` passes and rejects a return to the poster-first Wide selector.
+- `:androidApp:assembleFullDebug` completes successfully.
 
 Blockers: none.
 
