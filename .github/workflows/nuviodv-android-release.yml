@@ -177,7 +177,7 @@ jobs:
           - Playback details: optional live resolution, codec, dynamic range, and frame-rate row
           - Collections: native authenticated Trakt recommendations, watchlists, Up Next, Recently Aired, and calendar sources with website-compatible exports
           - Layout: rebuild Home Layout collection rows from the current Collections order and remove stale collection entries
-          - Artwork: optional RatingPosterDB portraits with branded integration icon, custom API-key support, the public Tier 0 fallback, and Continue Watching Wide portrait-strip coverage
+          - Artwork: optional RatingPosterDB portraits with branded integration icon, custom API-key support, the public Tier 0 fallback, and Continue Watching Wide coverage without changing episode-thumbnail priority
           - Continue Watching: shared add-on metadata queue capped at two request starts per second, with duplicate in-flight lookups coalesced
           - Authentication: Nuvio account, Trakt, and Simkl runtime configuration restored
 
