@@ -1,12 +1,13 @@
 package com.nuvio.app.core.sync
 
 import com.nuvio.app.features.debrid.DebridSettings
+import com.nuvio.app.features.debrid.DebridProviders
 import com.nuvio.app.features.mdblist.MdbListSettings
 import com.nuvio.app.features.player.PlayerSettingsUiState
-import com.nuvio.app.features.rpdb.RpdbSettings
 import com.nuvio.app.features.tmdb.TmdbSettings
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
@@ -29,23 +30,20 @@ class ProviderCredentialModelsTest {
     }
 
     @Test
-    fun `RPDB credential snapshot contains only the custom override`() {
-        val custom = credentialSnapshot(
-            tmdb = TmdbSettings(),
-            rpdb = RpdbSettings(apiKey = " personal-rpdb-key "),
-        )
-        val fallback = credentialSnapshot(
-            tmdb = TmdbSettings(),
-            rpdb = RpdbSettings(),
+    fun `RPDB credential stays local and is omitted from provider sync`() {
+        val snapshot = credentialSnapshot(
+            tmdb = TmdbSettings(apiKey = "tmdb-key"),
         )
 
+        assertFalse(snapshot.values.any { it.provider == "rpdb" })
         assertEquals(
-            buildJsonObject { put("api_key", "personal-rpdb-key") },
-            custom.values.single { it.provider == ProviderCredentialIds.RPDB }.credentialJson(),
-        )
-        assertEquals(
-            buildJsonObject { put("api_key", "") },
-            fallback.values.single { it.provider == ProviderCredentialIds.RPDB }.credentialJson(),
+            DebridProviders.all().map { ProviderCredentialIds.debrid(it.id) }.toSet() + setOf(
+                ProviderCredentialIds.TMDB,
+                ProviderCredentialIds.MDBLIST,
+                ProviderCredentialIds.ANIMESKIP,
+                ProviderCredentialIds.INTRODB,
+            ),
+            snapshot.values.map { it.provider }.toSet(),
         )
     }
 
@@ -151,13 +149,11 @@ class ProviderCredentialModelsTest {
 
     private fun credentialSnapshot(
         tmdb: TmdbSettings,
-        rpdb: RpdbSettings = RpdbSettings(),
     ) = ProviderCredentialSync.buildSnapshot(
         profileId = 1,
         debrid = DebridSettings(),
         tmdb = tmdb,
         mdbList = MdbListSettings(),
-        rpdb = rpdb,
         player = PlayerSettingsUiState(),
     )
 }

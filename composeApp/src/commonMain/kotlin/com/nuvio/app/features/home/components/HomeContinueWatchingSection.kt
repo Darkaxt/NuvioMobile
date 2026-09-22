@@ -72,6 +72,7 @@ import com.nuvio.app.features.watchprogress.WatchProgressCompletionPercentThresh
 import com.nuvio.app.features.watchprogress.continueWatchingItemKey
 import com.nuvio.app.features.watchprogress.CurrentDateProvider
 import com.nuvio.app.features.watchprogress.computeAirDateBadgeText
+import io.ktor.http.Url
 import kotlin.math.roundToInt
 import nuvio.composeapp.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -228,7 +229,27 @@ private fun ContinueWatchingItem.continueWatchingCardArtworkUrl(
 }
 
 private fun firstNonBlank(vararg values: String?): String? =
-    values.firstOrNull { value -> !value.isNullOrBlank() }?.trim()
+    values.firstOrNull { value -> !value.isNullOrBlank() }
+        ?.trim()
+        ?.unwrapContinueWatchingPosterCacheFallback()
+
+private fun String.unwrapContinueWatchingPosterCacheFallback(): String {
+    val posterCacheUrl = runCatching { Url(this) }.getOrNull() ?: return this
+    if (
+        !posterCacheUrl.host.equals("meta.remaxku.eu", ignoreCase = true) ||
+        !posterCacheUrl.encodedPath.startsWith("/poster-cache/")
+    ) {
+        return this
+    }
+
+    return posterCacheUrl.parameters["fallback"]
+        ?.trim()
+        ?.takeIf { fallback ->
+            fallback.startsWith("https://", ignoreCase = true) ||
+                fallback.startsWith("http://", ignoreCase = true)
+        }
+        ?: this
+}
 
 private fun ContinueWatchingItem.fallbackUrlForArtwork(artworkUrl: String?): String? {
     if (artworkUrl.isNullOrBlank()) return null
@@ -265,7 +286,11 @@ internal fun ContinueWatchingItem.shouldBlurContinueWatchingArtwork(
     artworkUrl: String?,
 ): Boolean {
     if (!blurUnwatchedEpisodes || !useEpisodeThumbnails) return false
-    val thumbnail = episodeThumbnail?.trim()?.takeIf { it.isNotBlank() } ?: return false
+    val thumbnail = episodeThumbnail
+        ?.trim()
+        ?.takeIf { it.isNotBlank() }
+        ?.unwrapContinueWatchingPosterCacheFallback()
+        ?: return false
     val artwork = artworkUrl?.trim()?.takeIf { it.isNotBlank() } ?: return false
     val isUnwatched = isNextUp || progressFraction < WatchProgressCompletionPercentThreshold / 100f
     return isUnwatched && artwork == thumbnail

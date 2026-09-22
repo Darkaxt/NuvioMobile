@@ -14,7 +14,7 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-4`: Apply RPDB only to portrait artwork for movie and series `MetaPreview` items with compatible IMDb or TMDB IDs.
 - `RPDB-5`: Leave landscape artwork, logos, folder covers, unsupported IDs, and non-movie/series items unchanged.
 - `RPDB-6`: If an RPDB image request fails, retry display with the item's original poster URL.
-- `RPDB-7`: Keep the custom API key profile-scoped and out of ordinary profile-settings payloads. Include it in the existing provider-credential synchronization path.
+- `RPDB-7`: Keep the custom API key profile-scoped and local-only. Exclude it from both ordinary profile-settings payloads and provider-credential synchronization so hosted sync never reads, writes, clears, or rejects it.
 - `RPDB-8`: Changing RPDB settings must take effect when returning to portrait-bearing screens without requiring an application restart.
 - `RPDB-9`: Cover the resolver, settings policy, and credential handling with focused tests.
 - `RPDB-10`: Publish the verified integration as a signed NuvioDV Android release with a version newer than the installed test build.
@@ -24,6 +24,7 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-14`: Continue Watching full-background Card artwork, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
 - `RPDB-15`: The artwork strip inside the Continue Watching Wide layout must preserve Nuvio's existing artwork priority. With episode thumbnails enabled, an available episode thumbnail remains primary. RPDB may replace a selected portrait poster, but must not change an episode-thumbnail selection into a series-poster selection. Existing fallbacks remain available when the preferred artwork is absent.
 - `RPDB-16`: Opening General > Integrations on Android must not decode the RPDB SVG through the Compose multiplatform Android painter. Android must use a platform-supported packaged drawable while iOS retains the shared SVG asset.
+- `RPDB-17`: Continue Watching must preserve episode-thumbnail priority while resolving a failing poster-cache wrapper to its supplied valid fallback image URL.
 
 ## Acceptance Criteria
 
@@ -34,7 +35,7 @@ The user requested RPDB support under General > Integrations and specified that 
 5. With RPDB enabled and a custom key, generated URLs use the custom key.
 6. Unsupported IDs, non-movie/series content, and non-portrait shapes keep their original artwork.
 7. An RPDB load failure falls back to the original portrait.
-8. The API key is excluded from the normal settings blob and included in provider credential sync.
+8. The API key is stored per profile on the device and excluded from both the normal settings blob and provider credential sync; all other supported provider credentials continue to synchronize.
 9. Focused common tests and the applicable Android compile/test tasks pass.
 10. The signed GitHub release identifies RPDB support and its APK reports the new NuvioDV version and version code.
 11. The RPDB integration row renders a bundled branded RPDB icon instead of the generic image glyph.
@@ -43,6 +44,7 @@ The user requested RPDB support under General > Integrations and specified that 
 14. Continue Watching full-background Card artwork and unsupported/non-media items retain their existing artwork selection.
 15. Continue Watching Wide items preserve the original episode-thumbnail-first behavior when that preference is enabled; when a portrait poster is selected instead, compatible IMDb/TMDB identifiers may use RPDB with the original poster as fallback.
 16. On Android, General > Integrations opens without an SVG-format exception and renders the branded RPDB icon from a native Android drawable.
+17. A poster-cache episode thumbnail whose wrapper fails but whose encoded fallback is valid renders that fallback in every Continue Watching layout without replacing the episode thumbnail with a series poster.
 
 ## Staged Plan And Reconciliation Ledger
 
@@ -106,9 +108,67 @@ Blockers: none.
 
 Tracked deferrals: none.
 
+### Stage 10: Continue Watching poster-cache fallback
+
+Status: `COMPLETE`
+
+Requirements: `RPDB-15`, `RPDB-17`
+
+Objective:
+
+- Keep episode thumbnails first while replacing an unusable poster-cache wrapper with the valid fallback URL already supplied by that wrapper.
+
+Acceptance evidence required:
+
+- A focused regression test reproduces the wrapper/fallback selection failure before the production change and passes afterward.
+- Ordinary episode thumbnails and non-proxy artwork remain unchanged.
+- Focused Continue Watching tests and Android compilation pass on the synchronized tree.
+
+Blockers: none.
+
+Tracked deferrals: none.
+
+Verification evidence:
+
+- `HomeContinueWatchingArtworkTest` reproduced the failure by selecting a `meta.remaxku.eu/poster-cache/` episode thumbnail whose encoded `fallback` was a valid TMDB image URL; before implementation the selector returned the failing wrapper.
+- The shared Continue Watching candidate selector now unwraps only the known poster-cache host/path and only accepts HTTP(S) fallback values after the existing artwork-priority decision.
+- The focused Home and RPDB Continue Watching test classes pass, covering episode-thumbnail priority, ordinary artwork, blur behavior, RPDB boundaries, and the poster-cache regression.
+- Android main compilation completed as part of the focused host-test task, and `git diff --check` reports no whitespace errors.
+- Reconciliation found that the blur predicate compared the resolved fallback URL with the unresolved wrapper; a second failing regression test was added, and the predicate now normalizes the thumbnail through the same resolver so unwatched-episode blur behavior is preserved.
+
+### Stage 11: Local-only RPDB credential exception
+
+Status: `COMPLETE`
+
+Requirements: `RPDB-7`
+
+Objective:
+
+- Keep RPDB API keys in the existing profile-scoped device storage while removing RPDB from every provider-credential sync input, snapshot, and remote-apply path.
+
+Acceptance evidence required:
+
+- A focused regression test fails while provider snapshots still contain RPDB and passes after RPDB is excluded.
+- Provider snapshots retain TMDB, MDBList, debrid, AnimeSkip, and IntroDB credentials.
+- Provider sync no longer observes, loads, snapshots, or applies `RpdbSettingsRepository`, so a remote sync cannot clear a local RPDB key.
+- The existing profile-settings credential policy still excludes the RPDB key.
+- Focused credential tests and Android compilation pass.
+
+Blockers: none.
+
+Tracked deferrals: none.
+
+Verification evidence:
+
+- `ProviderCredentialModelsTest` failed before implementation because the snapshot contained `rpdb`, then passed after RPDB was removed from the snapshot contract.
+- Provider snapshots still contain every configured debrid provider plus TMDB, MDBList, AnimeSkip, and IntroDB.
+- `ProviderCredentialSync` no longer imports, observes, loads, snapshots, or applies `RpdbSettingsRepository`; unexpected remote RPDB rows are ignored because merges operate only on the local supported-provider snapshot.
+- Android and iOS RPDB storage keep the API key under `ProfileScopedKey`, and profile changes still reload `RpdbSettingsRepository` through `ProfileRepository`.
+- `ProfileSettingsCredentialPolicyTest` confirms the ordinary settings payload excludes `rpdb_api_key`; focused credential tests and Android compilation pass.
+
 Verification:
 
-- Requirements `RPDB-1` through `RPDB-15` are satisfied.
+- Requirements `RPDB-1` through `RPDB-17` are satisfied.
 - `:composeApp:testAndroidHostTest` passes for the RPDB resolver, provider credential snapshot, and profile credential policy test classes.
 - `:androidApp:assembleFullDebug` completes successfully.
 - `git diff --check` reports no whitespace errors.
@@ -261,7 +321,7 @@ Tracked deferrals: none.
 
 ### Stage 9: Android Integrations crash regression
 
-Status: `ACTIVE`
+Status: `COMPLETE`
 
 Requirements: `RPDB-1`, `RPDB-11`, `RPDB-16`
 
@@ -276,6 +336,16 @@ Acceptance evidence required:
 - Focused RPDB tests and the Android debug build pass.
 - A signed normal release advances to `0.4.26-nuviodv.2` with version code `12227`.
 - ADB reproduction on tablet `R52W60CFTRL` no longer emits `Android platform doesn't support SVG format` when the Integrations page is opened on the signed release.
+
+Verification evidence:
+
+- The regression contract failed before the Android painter change because `rpdb_logo.xml` was absent and Android still selected the Compose SVG resource; it passes after the native vector and painter change.
+- Focused `RpdbPosterResolverTest` and `RpdbContinueWatchingArtworkTest` execution passes, and `:androidApp:assembleFullDebug` completed successfully before release publication.
+- Release workflow run `35681508310` built, verified, and published the signed ARM64 APK successfully.
+- GitHub release `v0.4.26-nuviodv.2` is a normal release (not draft or prerelease), targets `2f01213e2c7a39d37eddcbd9d51f673ed881e326`, and records SHA-256 `55ff95f8aba5d139340cb043583a2fed5cbeb87b21505c24f821802bb4439134` for the APK.
+- Independent APK inspection confirms package `com.darkaxt.nuviodv`, version code `12227`, version name `0.4.26-nuviodv.2`, and signer certificate SHA-256 `1fb94424753a90f993c678b6fa4322579253bb303f22c335db395a9e2557d571`.
+- `adb -s R52W60CFTRL install -r` completed successfully on the SM-X910 while preserving app data. Device package inspection reports version code `12227` and version name `0.4.26-nuviodv.2`.
+- On the installed signed release, General > Integrations renders the RatingPosterDB row, the RatingPosterDB settings page opens with RPDB enabled, the app remains foregrounded, and the Android crash buffer remains empty.
 
 Blockers: none.
 

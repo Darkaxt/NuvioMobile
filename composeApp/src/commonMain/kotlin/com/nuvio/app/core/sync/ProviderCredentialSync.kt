@@ -12,8 +12,6 @@ import com.nuvio.app.features.mdblist.MdbListSettingsRepository
 import com.nuvio.app.features.player.PlayerSettingsRepository
 import com.nuvio.app.features.player.PlayerSettingsUiState
 import com.nuvio.app.features.profiles.ProfileRepository
-import com.nuvio.app.features.rpdb.RpdbSettings
-import com.nuvio.app.features.rpdb.RpdbSettingsRepository
 import com.nuvio.app.features.tmdb.TmdbSettings
 import com.nuvio.app.features.tmdb.TmdbSettingsRepository
 import io.github.jan.supabase.postgrest.postgrest
@@ -159,15 +157,12 @@ object ProviderCredentialSync {
         MdbListSettingsRepository.uiState,
         PlayerSettingsRepository.uiState,
     ) { _, debrid, tmdb, mdbList, player ->
-        ProviderCredentialInputs(debrid, tmdb, mdbList, player)
-    }.combine(RpdbSettingsRepository.uiState) { inputs, rpdb ->
         buildSnapshot(
             profileId = ProfileRepository.activeProfileId,
-            debrid = inputs.debrid,
-            tmdb = inputs.tmdb,
-            mdbList = inputs.mdbList,
-            rpdb = rpdb,
-            player = inputs.player,
+            debrid = debrid,
+            tmdb = tmdb,
+            mdbList = mdbList,
+            player = player,
         )
     }
 
@@ -178,7 +173,6 @@ object ProviderCredentialSync {
             debrid = DebridSettingsRepository.snapshot(),
             tmdb = TmdbSettingsRepository.snapshot(),
             mdbList = MdbListSettingsRepository.snapshot(),
-            rpdb = RpdbSettingsRepository.snapshot(),
             player = PlayerSettingsRepository.uiState.value,
         )
         check(ProfileRepository.activeProfileId == profileId)
@@ -190,7 +184,6 @@ object ProviderCredentialSync {
         debrid: DebridSettings,
         tmdb: TmdbSettings,
         mdbList: MdbListSettings,
-        rpdb: RpdbSettings,
         player: PlayerSettingsUiState,
     ): ProviderCredentialSnapshot = ProviderCredentialSnapshot(
         profileId = profileId,
@@ -206,7 +199,6 @@ object ProviderCredentialSync {
             }
             add(ProviderCredentialValue(ProviderCredentialIds.TMDB, PROVIDER_API_KEY_FIELD, tmdb.apiKey.trim()))
             add(ProviderCredentialValue(ProviderCredentialIds.MDBLIST, PROVIDER_API_KEY_FIELD, mdbList.apiKey.trim()))
-            add(ProviderCredentialValue(ProviderCredentialIds.RPDB, PROVIDER_API_KEY_FIELD, rpdb.apiKey.trim()))
             add(
                 ProviderCredentialValue(
                     ProviderCredentialIds.ANIMESKIP,
@@ -242,9 +234,6 @@ object ProviderCredentialSync {
                 }
                 credential.provider == ProviderCredentialIds.MDBLIST -> {
                     MdbListSettingsRepository.setApiKey(credential.value)
-                }
-                credential.provider == ProviderCredentialIds.RPDB -> {
-                    RpdbSettingsRepository.setApiKey(credential.value)
                 }
                 credential.provider == ProviderCredentialIds.ANIMESKIP -> {
                     PlayerSettingsRepository.setAnimeSkipClientId(credential.value)
@@ -309,14 +298,6 @@ object ProviderCredentialSync {
         DebridSettingsRepository.ensureLoaded()
         TmdbSettingsRepository.ensureLoaded()
         MdbListSettingsRepository.ensureLoaded()
-        RpdbSettingsRepository.ensureLoaded()
         PlayerSettingsRepository.ensureLoaded()
     }
 }
-
-private data class ProviderCredentialInputs(
-    val debrid: DebridSettings,
-    val tmdb: TmdbSettings,
-    val mdbList: MdbListSettings,
-    val player: PlayerSettingsUiState,
-)
