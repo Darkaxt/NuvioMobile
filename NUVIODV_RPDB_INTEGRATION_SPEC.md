@@ -23,6 +23,7 @@ The user requested RPDB support under General > Integrations and specified that 
 - `RPDB-13`: Continue Watching portrait cards must preserve the original artwork as the display fallback when the RPDB request fails.
 - `RPDB-14`: Continue Watching full-background Card artwork, cloud-library artwork, unsupported identifiers, and non-movie/series items must remain unchanged.
 - `RPDB-15`: The artwork strip inside the Continue Watching Wide layout must preserve Nuvio's existing artwork priority. With episode thumbnails enabled, an available episode thumbnail remains primary. RPDB may replace a selected portrait poster, but must not change an episode-thumbnail selection into a series-poster selection. Existing fallbacks remain available when the preferred artwork is absent.
+- `RPDB-16`: Opening General > Integrations on Android must not decode the RPDB SVG through the Compose multiplatform Android painter. Android must use a platform-supported packaged drawable while iOS retains the shared SVG asset.
 
 ## Acceptance Criteria
 
@@ -41,6 +42,7 @@ The user requested RPDB support under General > Integrations and specified that 
 13. Portrait-style Continue Watching items with compatible IMDb/TMDB identifiers select RPDB first and fall back to their original poster after a load failure.
 14. Continue Watching full-background Card artwork and unsupported/non-media items retain their existing artwork selection.
 15. Continue Watching Wide items preserve the original episode-thumbnail-first behavior when that preference is enabled; when a portrait poster is selected instead, compatible IMDb/TMDB identifiers may use RPDB with the original poster as fallback.
+16. On Android, General > Integrations opens without an SVG-format exception and renders the branded RPDB icon from a native Android drawable.
 
 ## Staged Plan And Reconciliation Ledger
 
@@ -252,6 +254,28 @@ Evidence:
 - Focused `HomeContinueWatchingArtworkTest` and `RpdbContinueWatchingArtworkTest` execution passes.
 - `.github/scripts/test_rpdb_portrait_coverage.py` passes and rejects a return to the poster-first Wide selector.
 - `:androidApp:assembleFullDebug` completes successfully.
+
+Blockers: none.
+
+Tracked deferrals: none.
+
+### Stage 9: Android Integrations crash regression
+
+Status: `ACTIVE`
+
+Requirements: `RPDB-1`, `RPDB-11`, `RPDB-16`
+
+Objective:
+
+- Remove the Android runtime dependency on decoding `rpdb_logo.svg` while preserving the branded icon and the existing iOS resource path.
+
+Acceptance evidence required:
+
+- A focused regression contract fails against the current SVG-backed Android painter before production changes and passes afterward.
+- Android uses a native drawable resource for `IntegrationLogo.Rpdb`; iOS continues to use the shared SVG.
+- Focused RPDB tests and the Android debug build pass.
+- A signed normal release advances to `0.4.26-nuviodv.2` with version code `12227`.
+- ADB reproduction on tablet `R52W60CFTRL` no longer emits `Android platform doesn't support SVG format` when the Integrations page is opened on the signed release.
 
 Blockers: none.
 

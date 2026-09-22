@@ -82,7 +82,10 @@ jobs:
 
       - name: Test authenticated release configuration
         shell: bash
-        run: bash .github/scripts/test-configure-nuviodv-release.sh
+        run: |
+          set -euo pipefail
+          python .github/scripts/test_rpdb_android_icon.py
+          bash .github/scripts/test-configure-nuviodv-release.sh
 
       - name: Configure authenticated release signing
         shell: bash
@@ -178,6 +181,7 @@ jobs:
           - Collections: native authenticated Trakt recommendations, watchlists, Up Next, Recently Aired, and calendar sources with website-compatible exports
           - Layout: rebuild Home Layout collection rows from the current Collections order and remove stale collection entries
           - Artwork: optional RatingPosterDB portraits with branded integration icon, custom API-key support, the public Tier 0 fallback, and Continue Watching Wide coverage without changing episode-thumbnail priority
+          - Android integrations: RPDB branding now uses a native drawable so the Integrations page opens without the unsupported SVG crash
           - Continue Watching: shared add-on metadata queue capped at two request starts per second, with duplicate in-flight lookups coalesced
           - Authentication: Nuvio account, Trakt, and Simkl runtime configuration restored
 
