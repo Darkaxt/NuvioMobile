@@ -15,10 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,8 +117,8 @@ private fun PosterGridTile(
     onLongClick: (() -> Unit)? = null,
 ) {
     val rpdbPoster = item.rpdbPosterSelection()
-    var useFallbackPoster by remember(rpdbPoster) { mutableStateOf(false) }
-    val posterUrl = if (useFallbackPoster) rpdbPoster.fallbackUrl else rpdbPoster.primaryUrl
+    val posterUrl = rpdbPoster.primaryUrl
+    val fallbackPosterUrl = rpdbPoster.fallbackUrl ?: item.rawPosterUrl
 
     Column(
         modifier = modifier,
@@ -145,16 +142,25 @@ private fun PosterGridTile(
                 ),
         ) {
             if (posterUrl != null) {
+                val platformContext = coil3.compose.LocalPlatformContext.current
+                val hasFallback = !fallbackPosterUrl.isNullOrBlank() && fallbackPosterUrl != posterUrl
+                val imageModel = remember(posterUrl, fallbackPosterUrl, platformContext) {
+                    if (hasFallback) {
+                        coil3.request.ImageRequest.Builder(platformContext)
+                            .data(posterUrl)
+                            .memoryCacheKeyExtras(
+                                mapOf(com.nuvio.app.core.poster.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackPosterUrl!!)
+                            )
+                            .build()
+                    } else {
+                        posterUrl
+                    }
+                }
                 AsyncImage(
-                    model = posterUrl,
+                    model = imageModel,
                     contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
-                    onError = {
-                        if (!useFallbackPoster && !rpdbPoster.fallbackUrl.isNullOrBlank()) {
-                            useFallbackPoster = true
-                        }
-                    },
                 )
             }
             NuvioPosterWatchedOverlay(isWatched = isWatched)

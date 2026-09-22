@@ -26,10 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -123,8 +120,8 @@ fun <T> NuvioShelfSection(
 fun NuvioPosterCard(
     title: String,
     imageUrl: String?,
-    fallbackImageUrl: String? = null,
     modifier: Modifier = Modifier,
+    fallbackImageUrl: String? = null,
     shape: NuvioPosterShape = NuvioPosterShape.Poster,
     detailLine: String? = null,
     showTitleBelow: Boolean = true,
@@ -143,8 +140,6 @@ fun NuvioPosterCard(
         shape = shape,
     )
     val shouldShowTitleBelow = showTitleBelow && !posterCardStyle.hideLabelsEnabled
-    var useFallbackImage by remember(imageUrl, fallbackImageUrl) { mutableStateOf(false) }
-    val displayedImageUrl = if (useFallbackImage) fallbackImageUrl else imageUrl
 
     Column(
         modifier = modifier.width(cardWidth),
@@ -163,22 +158,31 @@ fun NuvioPosterCard(
                 .posterCardClickable(
                     onClick = onClick,
                     onLongClick = onLongClick,
-                    zoomImageUrl = displayedImageUrl,
+                    zoomImageUrl = imageUrl,
                     zoomCornerRadius = posterCardStyle.cornerRadiusDp.dp,
                 ),
             contentAlignment = Alignment.Center,
         ) {
-            if (displayedImageUrl != null) {
+            if (imageUrl != null) {
+                val platformContext = coil3.compose.LocalPlatformContext.current
+                val hasFallback = !fallbackImageUrl.isNullOrBlank() && fallbackImageUrl != imageUrl
+                val imageModel = remember(imageUrl, fallbackImageUrl, platformContext) {
+                    if (hasFallback) {
+                        coil3.request.ImageRequest.Builder(platformContext)
+                            .data(imageUrl)
+                            .memoryCacheKeyExtras(
+                                mapOf(com.nuvio.app.core.poster.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackImageUrl!!)
+                            )
+                            .build()
+                    } else {
+                        imageUrl
+                    }
+                }
                 AsyncImage(
-                    model = displayedImageUrl,
+                    model = imageModel,
                     contentDescription = title,
                     modifier = Modifier.matchParentSize(),
                     contentScale = ContentScale.Crop,
-                    onError = {
-                        if (!useFallbackImage && !fallbackImageUrl.isNullOrBlank()) {
-                            useFallbackImage = true
-                        }
-                    },
                 )
             } else {
                 Text(
