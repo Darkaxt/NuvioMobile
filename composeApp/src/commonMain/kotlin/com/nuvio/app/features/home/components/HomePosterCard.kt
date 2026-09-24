@@ -23,25 +23,30 @@ fun HomePosterCard(
     val posterCardStyle = rememberPosterCardStyleUiState()
     val isLandscapeMode = useLandscapeBackdropMode || posterCardStyle.catalogLandscapeModeEnabled
     val rpdbPoster = item.rpdbPosterSelection()
+    val imageUrl = if (isLandscapeMode) {
+        item.landscapePoster ?: item.banner ?: item.poster
+    } else {
+        rpdbPoster.primaryUrl
+    }
+    val fallbackImageUrl = if (isLandscapeMode && !item.landscapePoster.isNullOrBlank()) {
+        // Landscape custom poster -> fall back to original backdrop, then portrait
+        item.banner ?: item.rawPosterUrl
+    } else if (isLandscapeMode) {
+        item.rawPosterUrl
+    } else {
+        rpdbPoster.fallbackUrl ?: item.rawPosterUrl
+    }
 
     NuvioPosterCard(
         title = item.name,
-        imageUrl = if (isLandscapeMode) {
-            item.landscapePoster ?: item.banner ?: item.poster
-        } else {
-            rpdbPoster.primaryUrl
-        },
+        imageUrl = imageUrl,
         modifier = modifier,
-        fallbackImageUrl = if (isLandscapeMode) {
-            item.rawPosterUrl
-        } else {
-            rpdbPoster.fallbackUrl ?: item.rawPosterUrl
-        },
+        fallbackImageUrl = fallbackImageUrl,
         shape = if (isLandscapeMode) NuvioPosterShape.Landscape else item.posterShape.toNuvioPosterShape(),
         detailLine = if (isLandscapeMode || posterCardStyle.hideLabelsEnabled) null else item.releaseInfo?.let { formatReleaseDateForDisplay(it) },
         showTitleBelow = !posterCardStyle.hideLabelsEnabled,
-        bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay) item.logo else null,
-        bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
+        bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay && item.landscapePoster.isNullOrBlank()) item.logo else null,
+        bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && item.landscapePoster.isNullOrBlank() && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
         isWatched = isWatched,
         onClick = onClick,
         onLongClick = onLongClick,
