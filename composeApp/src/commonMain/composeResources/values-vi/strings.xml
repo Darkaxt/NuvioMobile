@@ -2354,4 +2354,22 @@
     <string name="compose_player_show_remaining_time">Hiển thị thời gian còn lại</string>
     <string name="compose_player_brightness">Độ sáng</string>
     <string name="compose_player_volume">Âm lượng</string>
+    <string name="series_status_ended">Đã kết thúc</string>
+    <string name="series_status_continuing">Còn tiếp</string>
+    <string name="series_status_current">Đang phát sóng</string>
+    <string name="series_status_cancelled">Đã bị hủy</string>
+    <string name="series_status_released">Đã phát hành</string>
+    <string name="series_status_planned">Sắp sản xuất</string>
+    <string name="series_status_rumored">Đang đồn đoán</string>
+    <string name="series_status_in_production">Đang sản xuất</string>
+    <string name="series_status_post_production">Hậu kỳ</string>
+    <string name="movie_status_ended">Đã kết thúc</string>
+    <string name="movie_status_continuing">Còn tiếp</string>
+    <string name="movie_status_current">Đang chiếu</string>
+    <string name="movie_status_cancelled">Đã bị hủy</string>
+    <string name="movie_status_released">Đã phát hành</string>
+    <string name="movie_status_planned">Sắp sản xuất</string>
+    <string name="movie_status_rumored">Đang đồn đoán</string>
+    <string name="movie_status_in_production">Đang sản xuất</string>
+    <string name="movie_status_post_production">Hậu kỳ</string>
 </resources>

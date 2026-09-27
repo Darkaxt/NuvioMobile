@@ -594,7 +594,6 @@ internal fun PlayPauseControlButton(
     ) {
         if (isBuffering) {
             NuvioLoadingIndicator(
-                color = Color.White,
                 modifier = Modifier.size(metrics.playIconSize),
             )
         } else {
