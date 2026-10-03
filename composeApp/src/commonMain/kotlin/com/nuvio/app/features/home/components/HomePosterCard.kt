@@ -23,12 +23,14 @@ fun HomePosterCard(
     val posterCardStyle = rememberPosterCardStyleUiState()
     val isLandscapeMode = useLandscapeBackdropMode || posterCardStyle.catalogLandscapeModeEnabled
     val rpdbPoster = item.rpdbPosterSelection()
+    val effectiveLandscapePoster =
+        if (posterCardStyle.alwaysShowLandscapeClearlogo) null else item.landscapePoster
     val imageUrl = if (isLandscapeMode) {
-        item.landscapePoster ?: item.banner ?: item.poster
+        effectiveLandscapePoster ?: item.banner ?: item.poster
     } else {
         rpdbPoster.primaryUrl
     }
-    val fallbackImageUrl = if (isLandscapeMode && !item.landscapePoster.isNullOrBlank()) {
+    val fallbackImageUrl = if (isLandscapeMode && !effectiveLandscapePoster.isNullOrBlank()) {
         // Landscape custom poster -> fall back to original backdrop, then portrait
         item.banner ?: item.rawPosterUrl
     } else if (isLandscapeMode) {
@@ -45,8 +47,8 @@ fun HomePosterCard(
         shape = if (isLandscapeMode) NuvioPosterShape.Landscape else item.posterShape.toNuvioPosterShape(),
         detailLine = if (isLandscapeMode || posterCardStyle.hideLabelsEnabled) null else item.releaseInfo?.let { formatReleaseDateForDisplay(it) },
         showTitleBelow = !posterCardStyle.hideLabelsEnabled,
-        bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay && item.landscapePoster.isNullOrBlank()) item.logo else null,
-        bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && item.landscapePoster.isNullOrBlank() && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
+        bottomLeftLogoUrl = if (isLandscapeMode && showLandscapeOverlay && effectiveLandscapePoster.isNullOrBlank()) item.logo else null,
+        bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && effectiveLandscapePoster.isNullOrBlank() && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
         isWatched = isWatched,
         onClick = onClick,
         onLongClick = onLongClick,

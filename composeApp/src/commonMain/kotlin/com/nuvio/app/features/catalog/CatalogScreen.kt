@@ -329,8 +329,25 @@ private fun CatalogPosterTile(
                 ),
         ) {
             if (posterUrl != null) {
+                val platformContext = coil3.compose.LocalPlatformContext.current
+                val rawFallbackUrl = item.rawPosterUrl?.takeIf {
+                    posterUrl == item.poster && it.isNotBlank() && it != posterUrl
+                }
+                val imageModel = remember(posterUrl, rawFallbackUrl, platformContext) {
+                    val fallbackUrl = rawFallbackUrl
+                    if (fallbackUrl != null) {
+                        coil3.request.ImageRequest.Builder(platformContext)
+                            .data(posterUrl)
+                            .memoryCacheKeyExtras(
+                                mapOf(com.nuvio.app.core.poster.CustomPosterFallbackInterceptor.FALLBACK_URL_KEY to fallbackUrl)
+                            )
+                            .build()
+                    } else {
+                        posterUrl
+                    }
+                }
                 AsyncImage(
-                    model = posterUrl,
+                    model = imageModel,
                     contentDescription = item.name,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop,
