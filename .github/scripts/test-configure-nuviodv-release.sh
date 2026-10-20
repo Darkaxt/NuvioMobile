@@ -41,7 +41,8 @@ run_configure() {
 run_configure_without_mdblist() {
   local runtime_properties="$1"
   local output_properties="$2"
-  RUNTIME_PROPERTIES_BASE64="$(encode "${runtime_properties}")" \
+  env -u MDBLIST_CLIENT_ID \
+    RUNTIME_PROPERTIES_BASE64="$(encode "${runtime_properties}")" \
     KEYSTORE_BASE64="$(encode 'test-keystore')" \
     STORE_PASSWORD='test-store-password' \
     KEY_ALIAS='test-key-alias' \
