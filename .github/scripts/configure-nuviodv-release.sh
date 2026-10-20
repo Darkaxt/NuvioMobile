@@ -3,6 +3,7 @@ set -euo pipefail
 
 required_environment=(
   RUNTIME_PROPERTIES_BASE64
+  MDBLIST_CLIENT_ID
   KEYSTORE_BASE64
   STORE_PASSWORD
   KEY_ALIAS
@@ -35,7 +36,7 @@ if [[ ! -s "${keystore_path}" ]]; then
   exit 1
 fi
 
-sed -E '/^[[:space:]]*(sdk\.dir|NUVIO_RELEASE_STORE_FILE|NUVIO_RELEASE_STORE_PASSWORD|NUVIO_RELEASE_KEY_ALIAS|NUVIO_RELEASE_KEY_PASSWORD)[[:space:]]*=/d' \
+sed -E '/^[[:space:]]*(sdk\.dir|MDBLIST_CLIENT_ID|NUVIO_RELEASE_STORE_FILE|NUVIO_RELEASE_STORE_PASSWORD|NUVIO_RELEASE_KEY_ALIAS|NUVIO_RELEASE_KEY_PASSWORD)[[:space:]]*=/d' \
   "${runtime_properties}" > "${sanitized_properties}"
 
 required_runtime_properties=(
@@ -56,6 +57,7 @@ done
 
 cp "${sanitized_properties}" "${output_properties}"
 {
+  printf '\nMDBLIST_CLIENT_ID=%s\n' "${MDBLIST_CLIENT_ID}"
   printf '\nNUVIO_RELEASE_STORE_FILE=%s\n' "${keystore_path}"
   printf 'NUVIO_RELEASE_STORE_PASSWORD=%s\n' "${STORE_PASSWORD}"
   printf 'NUVIO_RELEASE_KEY_ALIAS=%s\n' "${KEY_ALIAS}"

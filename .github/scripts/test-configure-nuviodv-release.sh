@@ -28,6 +28,20 @@ run_configure() {
   local runtime_properties="$1"
   local output_properties="$2"
   RUNTIME_PROPERTIES_BASE64="$(encode "${runtime_properties}")" \
+    MDBLIST_CLIENT_ID='test-mdblist-client' \
+    KEYSTORE_BASE64="$(encode 'test-keystore')" \
+    STORE_PASSWORD='test-store-password' \
+    KEY_ALIAS='test-key-alias' \
+    KEY_PASSWORD='test-key-password' \
+    RUNNER_TEMP="${test_root}" \
+    OUTPUT_PROPERTIES="${output_properties}" \
+    bash "${configure_script}"
+}
+
+run_configure_without_mdblist() {
+  local runtime_properties="$1"
+  local output_properties="$2"
+  RUNTIME_PROPERTIES_BASE64="$(encode "${runtime_properties}")" \
     KEYSTORE_BASE64="$(encode 'test-keystore')" \
     STORE_PASSWORD='test-store-password' \
     KEY_ALIAS='test-key-alias' \
@@ -43,6 +57,7 @@ NUVIO_SUPABASE_FALLBACK_URL=https://fallback.example.test
 TRAKT_CLIENT_ID=test-trakt-client
 TRAKT_CLIENT_SECRET=test-trakt-secret
 SIMKL_CLIENT_ID=test-simkl-client
+MDBLIST_CLIENT_ID=stale-blob-client
 sdk.dir=/must/not/survive
 NUVIO_RELEASE_STORE_FILE=/must/not/survive.jks'
 
@@ -56,6 +71,12 @@ if run_configure \
   fail "incomplete runtime configuration was accepted"
 fi
 
+if run_configure_without_mdblist \
+  "${complete_runtime_properties}" \
+  "${test_root}/missing-mdblist.properties" >/dev/null 2>&1; then
+  fail "missing MDBList client identifier was accepted"
+fi
+
 output_properties="${test_root}/complete.properties"
 run_configure "${complete_runtime_properties}" "${output_properties}"
 
@@ -66,12 +87,19 @@ for expected in \
   'TRAKT_CLIENT_ID=test-trakt-client' \
   'TRAKT_CLIENT_SECRET=test-trakt-secret' \
   'SIMKL_CLIENT_ID=test-simkl-client' \
+  'MDBLIST_CLIENT_ID=test-mdblist-client' \
   "NUVIO_RELEASE_STORE_FILE=${test_root}/nuviodv-release.jks" \
   'NUVIO_RELEASE_STORE_PASSWORD=test-store-password' \
   'NUVIO_RELEASE_KEY_ALIAS=test-key-alias' \
   'NUVIO_RELEASE_KEY_PASSWORD=test-key-password'; do
   grep -Fqx "${expected}" "${output_properties}" || fail "missing expected property name: ${expected%%=*}"
 done
+
+
+[[ "$(grep -c '^MDBLIST_CLIENT_ID=' "${output_properties}")" -eq 1 ]] || fail 'MDBList client identifier was not written exactly once'
+if grep -Fqx 'MDBLIST_CLIENT_ID=stale-blob-client' "${output_properties}"; then
+  fail 'MDBList client identifier from the runtime blob was not replaced'
+fi
 
 if grep -Eq '^(sdk\.dir|NUVIO_RELEASE_STORE_FILE=/must/not/survive)' "${output_properties}"; then
   fail "unsafe runtime properties survived sanitization"

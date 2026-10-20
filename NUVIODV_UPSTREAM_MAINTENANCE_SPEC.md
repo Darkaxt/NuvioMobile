@@ -17,6 +17,7 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - M11: The four releases retained by the 2026-09-14 lineage repair remain valid historical releases. Later verified sync releases may extend that set; every current release must be normal and the latest release must be the newest verified NuvioDV version.
 - M12: The NuvioDV in-app updater must query `Darkaxt/NuvioMobile` normal releases, not the upstream `NuvioMedia/NuvioMobile` feed.
 - M13: Upstream synchronization must preserve the fork's `.github/workflows` tree so the default GitHub Actions token never attempts a forbidden workflow-file push; upstream application history and all non-workflow files remain mergeable.
+- M14: Authenticated NuvioDV releases must include every runtime client identifier required by an integrated account provider. In particular, `MDBLIST_CLIENT_ID` must be injected into the release build and the workflow must fail closed before publication when it is absent or when generated `MdbListConfig.CLIENT_ID` is blank.
 
 ## Acceptance criteria
 
@@ -29,6 +30,7 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 - MC7: A fresh GitHub API audit proves every retained release is normal and the latest endpoint resolves to the newest verified NuvioDV release.
 - MC8: A regression contract fails against the upstream updater owner and passes only when the in-app release feed owner is `Darkaxt`.
 - MC9: A regression contract proves upstream workflow-file changes are restored to the pre-merge fork tree before commit/push, while a real pending-upstream sync reaches zero commits behind and publishes the exact verified normal release.
+- MC10: Release-configuration tests reject a missing MDBList client identifier, preserve a supplied identifier in `local.properties`, and the release workflow verifies that generated `MdbListConfig.CLIENT_ID` is non-empty before publishing.
 
 ## Stage and reconciliation ledger
 
@@ -38,9 +40,10 @@ Authorization: `already_authorized` by the user on 2026-09-12.
 | Three-day Codex maintenance and issue triage | COMPLETE | M7-M9 | Active heartbeat `maintain-nuviodv-upstream-fork` runs every three days with authorized remediation, quiet no-change behavior, and issue-delta triage; baseline reviewed all 343 open issues and records #1730 as high relevance while #1675/#1723 remain low confidence |
 | Public release-lineage repair | COMPLETE | M6, M10-M11 | Commit `3f063f84` removed the prerelease input/flag paths and made normal releases the enforced workflow contract; invalid historical releases/tags were deleted after audit, and subsequent releases through `v0.4.23-nuviodv.1` are normal and preserve upstream-aligned left-side versions |
 | Fork updater and workflow-permission repair | COMPLETE | M12-M13 | Commit `79a4adf1` points the regression contract and updater at the fork and preserves the fork workflow tree; upstream refactored the updater during the pending batch, so merge `79a32bc0` retained that refactor while routing `AppUpdaterRepository` to `Darkaxt/NuvioMobile`; local full-debug build passed, release run 35336010585 published the exact normal release, and no-update sync run 35336838855 passed |
+| MDBList release credential repair | BLOCKED | M14 | Root cause confirmed against public 0.6.2 APKs: upstream embeds a non-empty MDBList client ID while NuvioDV embeds an empty value. Configuration and workflow regression contracts pass; GitHub secret `NUVIODV_MDBLIST_CLIENT_ID` is installed; focused Gradle generation under gate ticket `ea1a025caff840f296125a187bf06751` produced a non-empty `MdbListConfig.CLIENT_ID` with the required 3 GB/two-worker profile and verified daemon exit. A corrected public APK remains blocked because this bug report did not separately authorize release publication. |
 | Final reconciliation | COMPLETE | M1-M13 | MC1-MC9 satisfied; fork is zero commits behind upstream, latest normal release and APK were independently verified, workflows and heartbeat remain active, blockers and tracked deferrals equal zero |
 
-Blockers: none.
+Blocker: the currently published APK cannot be considered fixed until an explicitly authorized normal release is built and independently verified. This is an external authorization blocker; it resolves when the owner requests publication, and current-build MDBList availability remains dependent on it.
 
 Tracked deferrals: none.
 

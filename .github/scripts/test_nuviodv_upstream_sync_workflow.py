@@ -88,6 +88,24 @@ class NuvioDvUpstreamSyncWorkflowTest(unittest.TestCase):
         self.assertIn("SOURCE_SHA: ${{ steps.release.outputs.source_sha }}", self.release_workflow)
         self.assertIn('--target "${SOURCE_SHA}"', self.release_workflow)
 
+    def test_release_requires_and_verifies_mdblist_client_identifier(self) -> None:
+        self.assertIn(
+            "MDBLIST_CLIENT_ID: ${{ secrets.NUVIODV_MDBLIST_CLIENT_ID }}",
+            self.release_workflow,
+        )
+        self.assertIn(
+            "RUNTIME_PROPERTIES_BASE64 MDBLIST_CLIENT_ID KEYSTORE_BASE64",
+            self.release_workflow,
+        )
+        self.assertIn(
+            "composeApp/build/generated/runtime-config/kotlin/com/nuvio/app/features/mdblist/MdbListConfig.kt",
+            self.release_workflow,
+        )
+        self.assertIn(
+            "grep -Eq 'const val CLIENT_ID = \"[^\"]+\"' \"${mdblist_config}\"",
+            self.release_workflow,
+        )
+
     def test_all_published_builds_are_normal_releases(self) -> None:
         self.assertIn("Dispatch the authenticated release", self.workflow)
         self.assertNotIn("authenticated prerelease", self.workflow)
